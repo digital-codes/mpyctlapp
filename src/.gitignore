@@ -1,9 +1,0 @@
-node_modules/
-.vscode/
-*.map
-.sourcemaps
-dist/
-cache/
-temp/
-.cache/
-.temp/
