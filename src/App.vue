@@ -1,5 +1,5 @@
 <script setup>
-import { ref, nextTick } from 'vue'
+import { ref } from 'vue'
 import logo from "./assets/imgs/logo.png"
 
 import BleScan from "./components/BleScan.vue"
@@ -7,23 +7,25 @@ import ExitCheck from "./components/ExitCheck.vue"
 
 import { App as CApp } from '@capacitor/app';
 
+import { Device } from '@capacitor/device';
+
+const logDeviceInfo = async () => {
+  const info = await Device.getInfo();
+  console.log(info);
+};
+
 
 const showSidebar = ref(false)
 const page = ref(1)
 
-const exiting = ref(false)
-const ex = ref()
+const exitCheck = ref()
 
 const closeApp = async () => {
   console.log("Closing app")
-  exiting.value = true
-  await nextTick()  
-  const xx = await ex.value.show();
-  console.log("xx:",xx)
-
-  exiting.value = false
-  await nextTick()  
-  if (xx) CApp.exitApp()
+  logDeviceInfo()
+  if (await exitCheck.value.show()) {
+    CApp.exitApp()
+  }
 }
 CApp.addListener('backButton', closeApp)
 
@@ -34,6 +36,9 @@ CApp.addListener('backButton', closeApp)
 <template>
   <VaLayout style="height: 500px">
     <template #top>
+
+      <ExitCheck ref="exitCheck"></ExitCheck>
+
       <VaNavbar color="primary" class="py-2">
         <template #left>
           <VaButton :icon="showSidebar ? 'menu_open' : 'menu'" @click="showSidebar = !showSidebar" />
@@ -52,7 +57,7 @@ CApp.addListener('backButton', closeApp)
     </template>
 
     <template #left>
-      <VaSidebar v-model="showSidebar" class="py-4">
+      <VaSidebar v-model="showSidebar" class="py-4" closeOnClickOutside="true">
         <VaSidebarItem :active="page === 1" @click="page = 1">
           <VaSidebarItemContent>
             <VaIcon name="home" />
@@ -73,9 +78,6 @@ CApp.addListener('backButton', closeApp)
     </template>
 
     <template #content>
-      <main v-if="exiting">
-        <ExitCheck ref="ex"></ExitCheck>
-      </main>
       <main v-if="page === 1" class="p-4">
         <h3 class="va-h3">
           Page 1
@@ -121,8 +123,6 @@ CApp.addListener('backButton', closeApp)
   border: 1px dashed var(--va-secondary);
   padding: 6px 10px;
 }
-
-
 </style>
 
 

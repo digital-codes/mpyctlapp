@@ -1,5 +1,4 @@
 <template>
-    <h1>Exiting</h1>
 </template>
   
 <script setup lang="js">
@@ -14,13 +13,7 @@ const show = async () => {
         okText: "Yes",
         cancelText: "No",
     })
-    if (exit) {
-        alert('Exiting now')
-        return true
-    } else {
-        console.log("cancelled")
-        return false
-    }
+    return exit
 }
 
 defineExpose({
