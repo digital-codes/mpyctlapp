@@ -4,6 +4,7 @@ import logo from "./assets/imgs/logo.png"
 
 import BleScan from "./components/BleScan.vue"
 import ExitCheck from "./components/ExitCheck.vue"
+import SimpleChart from "./components/SimpleChart.vue"
 
 import { App as CApp } from '@capacitor/app';
 
@@ -20,14 +21,20 @@ const page = ref(1)
 
 const exitCheck = ref()
 
+const schart = ref()
+
 const closeApp = async () => {
   console.log("Closing app")
   logDeviceInfo()
   if (await exitCheck.value.show()) {
     CApp.exitApp()
+  } else {
+    schart.value.pushData(Math.random())
   }
 }
 CApp.addListener('backButton', closeApp)
+
+setInterval(() => { if (schart.value) schart.value.pushData(Math.random())},200)
 
 
 </script>
@@ -57,7 +64,7 @@ CApp.addListener('backButton', closeApp)
     </template>
 
     <template #left>
-      <VaSidebar v-model="showSidebar" class="py-4" closeOnClickOutside="true">
+      <VaSidebar v-model="showSidebar" class="py-4" closeOnClickOutside>
         <VaSidebarItem :active="page === 1" @click="page = 1">
           <VaSidebarItemContent>
             <VaIcon name="home" />
@@ -97,7 +104,7 @@ CApp.addListener('backButton', closeApp)
         </h3>
         <p>Page content must be wrapped in main tag. You must do it manually. Here you can place any blocks you need in
           your application.</p>
-        <BleScan></BleScan>
+        <SimpleChart ref="schart"></SimpleChart>
 
         <p>For example, you can place here your router view, add sidebar with navigation in #left slot.</p>
         <p>If you're using VaSidebar for page navigation don't forget to wrap it in nav tag.</p>
