@@ -1,0 +1,116 @@
+<script setup>
+  import { ref } from 'vue'
+  import logo from "./assets/imgs/logo.png"
+
+  import BleScan from "./components/BleScan.vue"
+
+  const showSidebar = ref(false)
+  const page = ref(1)
+
+
+</script>
+
+
+<template>
+
+  <VaLayout style="height: 500px">
+    <template #top>
+      <VaNavbar
+        color="primary"
+        class="py-2"
+      >
+        <template #left>
+          <VaButton
+            :icon="showSidebar ? 'menu_open' : 'menu'"
+            @click="showSidebar = !showSidebar"
+          />
+        </template>
+        <template #center>
+          <VaNavbarItem class="font-bold text-lg">
+            LOGO
+          </VaNavbarItem>
+        </template>
+        <template #right>
+        <VaNavbarItem class="navbar-item-slot">
+          <VaAvatar
+            class="w-full md:w-1/2 lg:w-1/3"
+            :src="logo"
+          />
+        </VaNavbarItem>
+      </template>
+     </VaNavbar>
+    </template>
+
+    <template #left>
+      <VaSidebar v-model="showSidebar" class="py-4">
+        <VaSidebarItem :active="page === 1" @click="page = 1">
+          <VaSidebarItemContent>
+            <VaIcon name="home" /> 
+            <VaSidebarItemTitle>
+              Home
+            </VaSidebarItemTitle>
+          </VaSidebarItemContent>
+        </VaSidebarItem>
+        <VaSidebarItem :active="page === 2" @click="page = 2">
+          <VaSidebarItemContent>
+            <VaIcon name="phone" />
+            <VaSidebarItemTitle>
+              About
+            </VaSidebarItemTitle>
+          </VaSidebarItemContent>
+        </VaSidebarItem>
+      </VaSidebar>
+    </template>
+
+    <template #content>
+      <main
+        v-if="page === 1"
+        class="p-4"
+      >
+        <h3 class="va-h3">
+          Page 1
+        </h3>
+
+        <BleScan></BleScan>
+
+        <p>Page content must be wrapped in main tag. You must do it manually. Here you can place any blocks you need in your application.</p>
+
+        <p>For example, you can place here your router view, add sidebar with navigation in #left slot.</p>
+        <p>If you're using VaSidebar for page navigation don't forget to wrap it in nav tag.</p>
+      </main>
+      <main
+        v-else-if="page === 2"
+        class="p-4"
+      >
+        <h3 class="va-h3">
+          Page 2
+        </h3>
+        <p>Page content must be wrapped in main tag. You must do it manually. Here you can place any blocks you need in your application.</p>
+        <BleScan></BleScan>
+
+        <p>For example, you can place here your router view, add sidebar with navigation in #left slot.</p>
+        <p>If you're using VaSidebar for page navigation don't forget to wrap it in nav tag.</p>
+      </main>
+    </template>
+  </VaLayout>
+
+</template>
+
+
+<style>
+#app {
+  text-align: center;
+  color: var(--ep-text-color-primary);
+}
+
+.main-container {
+  height: calc(100vh - var(--ep-menu-item-height) - 3px);
+}
+</style>
+
+<style scoped>
+.navbar-item-slot {
+  border: 1px dashed var(--va-secondary);
+  padding: 6px 10px;
+}
+</style>

@@ -1,0 +1,8 @@
+{
+  "appId": "digital.dki.mpyctl",
+  "appName": "mpyctl",
+  "webDir": "dist",
+  "server": {
+    "androidScheme": "https"
+  }
+}
