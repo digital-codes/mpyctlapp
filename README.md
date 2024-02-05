@@ -15,3 +15,7 @@ when publishing new release, make sure to update version
 
 in android/app/build.gradle
 
+set sdk location in android/local.properties
+
+> sdk.dir=/home/kugel/Android/Sdk
+

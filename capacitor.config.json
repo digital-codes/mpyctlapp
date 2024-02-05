@@ -1,5 +1,5 @@
 {
-  "appId": "digital.dki.mpyctl",
+  "appId": "digital.dki.mpyctlapp",
   "appName": "mpyctlapp",
   "webDir": "dist",
   "server": {
