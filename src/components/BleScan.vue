@@ -57,8 +57,10 @@ const clicked = async () => {
 const blescan = async () => {
   bleInit()
   try {
-    await BleClient.initialize({ androidNeverForLocation: true });
-    //await BleClient.initialize();
+    // setting androidNeverForLocation break BLE on android (at least older versions)
+    // maybe would need mods in manifest as well then ...
+    //await BleClient.initialize({ androidNeverForLocation: true });
+    await BleClient.initialize();
   } catch (e) {
     console.log("Error init BLE:",e)
     return
