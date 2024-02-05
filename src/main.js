@@ -1,12 +1,6 @@
 import { SplashScreen } from '@capacitor/splash-screen';
 
-//import { blescan, setId } from "./utils/blescan"
-
-import { App as CApp } from '@capacitor/app';
-
 import { createApp } from 'vue'
-
-//import './style.css'
 
 import App from './App.vue'
 
@@ -24,11 +18,5 @@ const app = createApp(App)
 app.use(createVuestic())
 app.mount('#app')
 
-
-const closeApp = () => {
-  console.log("Closing app")
-  CApp.exitApp()
-}
-CApp.addListener('backButton', closeApp)
 
 
