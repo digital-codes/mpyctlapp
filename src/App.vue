@@ -41,6 +41,10 @@ const goto = (pg) => {
   showSidebar.value = false
 }
 
+const menuToggle = () => {
+  showSidebar.value = !showSidebar.value
+}
+
 </script>
 
 
@@ -52,7 +56,7 @@ const goto = (pg) => {
 
       <VaNavbar color="primary" class="py-2">
         <template #left>
-          <VaButton :icon="showSidebar ? 'menu_open' : 'menu'" @click="showSidebar = !showSidebar" />
+          <VaButton :icon="showSidebar ? 'fa-xmark' : 'fa-bars'" @click="menuToggle()" />
         </template>
         <template #center>
           <VaNavbarItem class="font-bold text-lg">
@@ -68,10 +72,11 @@ const goto = (pg) => {
     </template>
 
     <template #left>
-      <VaSidebar v-model="showSidebar" class="py-4" closeOnClickOutside>
+      <VaSidebar v-model="showSidebar" class="py-4" >
         <VaSidebarItem :active="page === 1" @click="goto(1)">
           <VaSidebarItemContent>
-            <VaIcon name="home" />
+            <VaIcon name="fab-github" size="small"  spin/>
+            <VaIcon name="fab-github" size="large" />
             <VaSidebarItemTitle>
               Home
             </VaSidebarItemTitle>
@@ -79,7 +84,7 @@ const goto = (pg) => {
         </VaSidebarItem>
         <VaSidebarItem :active="page === 2" @click="goto(2)">
           <VaSidebarItemContent>
-            <VaIcon name="phone" />
+            <VaIcon name="fas-phone" spin="counter-clockwise" color="secondary"/>
             <VaSidebarItemTitle>
               About
             </VaSidebarItemTitle>

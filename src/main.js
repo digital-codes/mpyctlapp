@@ -4,18 +4,64 @@ import { createApp } from 'vue'
 
 import App from './App.vue'
 
-import { createVuestic } from "vuestic-ui";
+import { createVuestic, createIconsConfig } from "vuestic-ui";
 import "vuestic-ui/css";
 
-import "material-design-icons-iconfont/dist/material-design-icons.min.css";
+// fontwaesome icons
+import '@fortawesome/fontawesome-free/css/all.min.css'
+
+// remove material icons
+//import "material-design-icons-iconfont/dist/material-design-icons.min.css";
 
 // override 
 import "./css/style.css"
 import "./css/fonts.css"
 
+// fontawesome font setup
+const fonts = [
+    {
+        name: 'fas-{code}',
+        resolve: ({code}) => ({
+            class: `fas fa-${code}`,
+            //content:"",
+            //attrs:"",
+            //tag:"", 
+        }),
+      },
+      {
+        name: 'fa-{code}',
+        resolve: ({code}) => ({
+            class: `fa fa-${code}`,
+            //content:"",
+            //attrs:"",
+            //tag:"", 
+        }),
+      },
+      {
+        name: 'fab-{code}',
+        resolve: ({code}) => ({
+            class: `fab fa-${code}`,
+            //content:"",
+            //attrs:"",
+            //tag:"", 
+        }),
+      }
+    ]
+
+const aliases = []
 
 const app = createApp(App)
-app.use(createVuestic())
+app.use(createVuestic({
+    config: {
+        icons: createIconsConfig({ aliases, fonts }),
+        components: {
+          /* ... */
+          all: { /* ... */ },
+          presets: { /* ... */ },
+        },
+        colors: { /* ... */ },
+      },    
+}))
 app.mount('#app')
 
 
