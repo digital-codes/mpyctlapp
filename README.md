@@ -2,7 +2,7 @@
 
 Mobile app to interact with BLE perpherals like https://github.com/digital-codes/bleSensor
 
-Tested on Android and Browser: Chrome on Android, Chromium on Linux, Bluefy on iOS
+Tested on Android and Browser: Chrome on Android, Chromium on Linux, Bluefy on iOS, Edge on Windows
 
 
 # Android
