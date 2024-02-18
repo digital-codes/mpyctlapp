@@ -36,6 +36,10 @@ CApp.addListener('backButton', closeApp)
 
 setInterval(() => { if (schart.value) schart.value.pushData(Math.random())},200)
 
+const goto = (pg) => {
+  page.value = pg
+  showSidebar.value = false
+}
 
 </script>
 
@@ -56,7 +60,7 @@ setInterval(() => { if (schart.value) schart.value.pushData(Math.random())},200)
           </VaNavbarItem>
         </template>
         <template #right>
-          <VaNavbarItem class="navbar-item-slot">
+          <VaNavbarItem class="navbar-item-slot avatar">
             <VaAvatar class="w-full md:w-1/2 lg:w-1/3" :src="logo" />
           </VaNavbarItem>
         </template>
@@ -65,7 +69,7 @@ setInterval(() => { if (schart.value) schart.value.pushData(Math.random())},200)
 
     <template #left>
       <VaSidebar v-model="showSidebar" class="py-4" closeOnClickOutside>
-        <VaSidebarItem :active="page === 1" @click="page = 1">
+        <VaSidebarItem :active="page === 1" @click="goto(1)">
           <VaSidebarItemContent>
             <VaIcon name="home" />
             <VaSidebarItemTitle>
@@ -73,7 +77,7 @@ setInterval(() => { if (schart.value) schart.value.pushData(Math.random())},200)
             </VaSidebarItemTitle>
           </VaSidebarItemContent>
         </VaSidebarItem>
-        <VaSidebarItem :active="page === 2" @click="page = 2">
+        <VaSidebarItem :active="page === 2" @click="goto(2)">
           <VaSidebarItemContent>
             <VaIcon name="phone" />
             <VaSidebarItemTitle>
@@ -130,6 +134,11 @@ setInterval(() => { if (schart.value) schart.value.pushData(Math.random())},200)
   border: 1px dashed var(--va-secondary);
   padding: 6px 10px;
 }
+
+.avatar {
+  border:unset;
+}
+
 </style>
 
 
