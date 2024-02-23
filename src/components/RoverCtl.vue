@@ -6,14 +6,16 @@
             </va-button>
         </div>
         <div class="sgrid">
-            <va-slider v-for="slider in sliders" :key="slider.id" v-model="slider.value" @change="handleSliderChange(slider.id, slider.value)"></va-slider>
+            <va-slider v-for="slider in sliders" :key="slider.id" 
+            v-model="slider.value" :min="slider.min" :max="slider.max" 
+            @change="handleSliderChange(slider.id, slider.value)"></va-slider>
         </div>
         <div class="sgrid">
             <va-checkbox v-for="checkbox in checkboxes" :key="checkbox.id" 
             v-model="checkbox.checked" 
             class="mb-6"
             color="primary"
-            checked-icon="fab-github"
+            checked-icon="fa-check"
             :label="checkbox.label"
             @update:modelValue="handleCheckboxChange(checkbox.id, checkbox.checked)"
             >
@@ -24,6 +26,12 @@
 
 <script setup>
 import { ref, defineEmits } from 'vue';
+import { onMounted } from 'vue';
+
+onMounted(() => {
+    console.log("Mounted")
+    // Your mounted logic here
+});
 
 const emit = defineEmits(['button-click', 'slider-change', 'checkbox-change']);
 
@@ -40,8 +48,8 @@ const buttons = ref([
 ]);
 
 const sliders = ref([
-    { id: 1, value: 0 },
-    { id: 2, value: 0 },
+    { id: 1, value: 5, min: 0, max:10 },
+    { id: 2, value: 0, min:-1,max:1 },
 ]);
 
 const checkboxes = ref([
