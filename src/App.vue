@@ -5,6 +5,7 @@ import logo from "./assets/imgs/logo.png"
 import BleScan from "./components/BleScan.vue"
 import ExitCheck from "./components/ExitCheck.vue"
 import SimpleChart from "./components/SimpleChart.vue"
+import RoverCtl from "./components/RoverCtl.vue"
 
 import { App as CApp } from '@capacitor/app';
 
@@ -34,7 +35,7 @@ const closeApp = async () => {
 }
 CApp.addListener('backButton', closeApp)
 
-setInterval(() => { if (schart.value) schart.value.pushData(Math.random())},200)
+setInterval(() => { if (schart.value) schart.value.pushData(Math.random()) }, 200)
 
 const goto = (pg) => {
   page.value = pg
@@ -44,6 +45,13 @@ const goto = (pg) => {
 const menuToggle = () => {
   showSidebar.value = !showSidebar.value
 }
+
+const handleRoverCtlEmit = (payload) => {
+  // Handle the emitted event from RoverCtl component
+  console.log('Received emit from RoverCtl:', payload);
+  // Perform any necessary actions based on the emitted data
+}
+
 
 </script>
 
@@ -72,10 +80,10 @@ const menuToggle = () => {
     </template>
 
     <template #left>
-      <VaSidebar v-model="showSidebar" class="py-4" >
+      <VaSidebar v-model="showSidebar" class="py-4">
         <VaSidebarItem :active="page === 1" @click="goto(1)">
           <VaSidebarItemContent>
-            <VaIcon name="fab-github" size="small"  spin/>
+            <VaIcon name="fab-github" size="small" spin />
             <VaIcon name="fab-github" size="large" />
             <VaSidebarItemTitle>
               Home
@@ -84,7 +92,7 @@ const menuToggle = () => {
         </VaSidebarItem>
         <VaSidebarItem :active="page === 2" @click="goto(2)">
           <VaSidebarItemContent>
-            <VaIcon name="fas-phone" spin="counter-clockwise" color="secondary"/>
+            <VaIcon name="fas-phone" spin="counter-clockwise" color="secondary" />
             <VaSidebarItemTitle>
               About
             </VaSidebarItemTitle>
@@ -113,8 +121,8 @@ const menuToggle = () => {
         </h3>
         <p>Page content must be wrapped in main tag. You must do it manually. Here you can place any blocks you need in
           your application.</p>
+        <RoverCtl @emit="handleRoverCtlEmit"></RoverCtl>
         <SimpleChart ref="schart"></SimpleChart>
-
         <p>For example, you can place here your router view, add sidebar with navigation in #left slot.</p>
         <p>If you're using VaSidebar for page navigation don't forget to wrap it in nav tag.</p>
       </main>
@@ -141,9 +149,8 @@ const menuToggle = () => {
 }
 
 .avatar {
-  border:unset;
+  border: unset;
 }
-
 </style>
 
 
