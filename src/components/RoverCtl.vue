@@ -46,8 +46,13 @@ import { onMounted } from "vue";
 
 onMounted(() => {
   console.log("Mounted");
-  // Your mounted logic here
-});
+  // buttons and checks are off by default. trnasmit default slider values only
+  for (const item of sliders.value) {
+    const id = item.id;
+    const value = item.value;  
+    emit("slider-change", { id, value })
+  } 
+})
 
 const emit = defineEmits(["button-click", "slider-change", "checkbox-change"]);
 
