@@ -132,6 +132,7 @@ button {
 .va-checkbox {
   text-align: center;
   grid-column: span 1;
+  margin:auto
 }
 </style>
 
@@ -144,7 +145,7 @@ button {
 
 @media (max-width: 500px) {
   .sld .va-input__label {
-    width: 15%;
+    width: 20%;
     text-align: center;
   }
 }

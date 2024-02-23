@@ -8,4 +8,6 @@
   }
 
 /* vuestic override */
-:root{--va-font-family:"Dekko";}  
+:root {
+  --va-font-family:"Dekko";
+}  
