@@ -29,7 +29,7 @@
     "echarts": "^5.4.3",
     "vue": "^3.3.11",
     "vue3-echarts": "^1.1.0",
-    "vuestic-ui": "^1.8.8"
+    "vuestic-ui": "^1.9.3"
   },
   "devDependencies": {
     "@capacitor/cli": "^5.6.0",
