@@ -105,7 +105,7 @@ const viewCtl = (val) => {
       <VaSidebar v-model="showSidebar" class="py-4">
         <VaSidebarItem :active="page === 1" @click="goto(1)">
           <VaSidebarItemContent>
-            <VaIcon name="fab-github"/>
+            <VaIcon name="fab-bluetooth-b"/>
             <VaSidebarItemTitle> Home </VaSidebarItemTitle>
           </VaSidebarItemContent>
         </VaSidebarItem>
