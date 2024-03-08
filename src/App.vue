@@ -105,19 +105,28 @@ const viewCtl = (val) => {
       <VaSidebar v-model="showSidebar" class="py-4">
         <VaSidebarItem :active="page === 1" @click="goto(1)">
           <VaSidebarItemContent>
-            <VaIcon name="fab-github" size="small" spin />
-            <VaIcon name="fab-github" size="large" />
+            <VaIcon name="fab-github"/>
             <VaSidebarItemTitle> Home </VaSidebarItemTitle>
           </VaSidebarItemContent>
         </VaSidebarItem>
         <VaSidebarItem :active="page === 2" @click="goto(2)">
           <VaSidebarItemContent>
             <VaIcon
-              name="fas-phone"
+              name="fas-robot" 
+              size="large" 
               spin="counter-clockwise"
               color="secondary"
             />
-            <VaSidebarItemTitle> About </VaSidebarItemTitle>
+            <VaSidebarItemTitle> Rover </VaSidebarItemTitle>
+          </VaSidebarItemContent>
+        </VaSidebarItem>
+        <VaSidebarItem :active="page === 3" @click="goto(3)">
+          <VaSidebarItemContent>
+            <VaIcon
+              name="fas-chart-line"
+              color="secondary"
+            />
+            <VaSidebarItemTitle> Chart </VaSidebarItemTitle>
           </VaSidebarItemContent>
         </VaSidebarItem>
       </VaSidebar>
@@ -144,17 +153,20 @@ const viewCtl = (val) => {
         </p>
       </main>
       <main v-else-if="page === 2" class="p-4">
-        <h3 class="va-h3">Page 2</h3>
-        <p>
-          Page content must be wrapped in main tag. You must do it manually.
-          Here you can place any blocks you need in your application.
-        </p>
+        <h3 class="va-h3">Rover Control</h3>
         <RoverCtl
           @button-click="handleRoverButton"
           @slider-change="handleRoverSlider"
           @checkbox-change="handleRoverCheck"
         >
         </RoverCtl>
+      </main>
+      <main v-else-if="page === 3" class="p-4">
+        <h3 class="va-h3">Page 3</h3>
+        <p>
+          Page content must be wrapped in main tag. You must do it manually.
+          Here you can place any blocks you need in your application.
+        </p>
         <SimpleChart ref="schart"></SimpleChart>
         <p>
           For example, you can place here your router view, add sidebar with

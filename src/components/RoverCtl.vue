@@ -6,6 +6,7 @@
         :key="button.id"
         @click="handleClick(button)"
         :color="button.color"
+        :class="button.double?'double-width':''"
       >
         {{ button.label }}
       </va-button>
@@ -57,20 +58,22 @@ onMounted(() => {
 const emit = defineEmits(["button-click", "slider-change", "checkbox-change"]);
 
 const buttons = ref([
-  { id: 1, label: "FWD Left", color: "primary" },
+  { id: 1, label: "Left", color: "primary" },
   { id: 2, label: "FWD", color: "primary" },
-  { id: 3, label: "FWD Right", color: "primary" },
-  { id: 4, label: "Left", color: "primary" },
-  { id: 5, label: "Stop", color: "warning" },
-  { id: 6, label: "Right", color: "primary" },
-  { id: 7, label: "REV Left", color: "primary" },
-  { id: 8, label: "REV", color: "primary" },
-  { id: 9, label: "REV Right", color: "primary" },
+  { id: 3, label: "REV", color: "primary" },
+  { id: 4, label: "Right", color: "primary" },
+  { id: 5, label: "FWD Left", color: "primary" },
+  { id: 6, label: "REV Left", color: "primary" },
+  { id: 7, label: "REV Right", color: "primary" },
+  { id: 8, label: "FWD Right", color: "primary" },
+  { id: 9, label: "Rot Left", color: "primary" },
+  { id: 10, label: "Stop", color: "warning", double: true},
+  { id: 11, label: "Rot Right", color: "primary" },
 ]);
 
 const sliders = ref([
-  { id: 1, value: 5, min: 0, max: 10, label: "Speed" },
-  { id: 2, value: 0, min: -1, max: 1, label: "Rotation" },
+  { id: 1, value: 5, min: 1, max: 10, label: "Speed" },
+  //{ id: 2, value: 0, min: -1, max: 1, label: "Rotation" },
 ]);
 
 const checkboxes = ref([
@@ -110,7 +113,7 @@ const handleCheckboxChange = (id, checked) => {
 .bgrid {
   margin-top: 2rem;
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(4, 1fr);
   grid-gap: 10px;
 }
 .sgrid {
@@ -120,9 +123,13 @@ const handleCheckboxChange = (id, checked) => {
   grid-gap: 10px;
 }
 
+.double-width {
+    grid-column: span 2; /* Makes the item span two columns */
+}
+
 button {
   width: 100%;
-  height: 100px;
+  height: 6rem;
 }
 
 .va-slider {
@@ -133,6 +140,12 @@ button {
   text-align: center;
   grid-column: span 1;
   margin:auto
+}
+
+@media (max-width: 500px) {
+  button {
+    height: 4rem;
+  }
 }
 </style>
 
