@@ -27,6 +27,7 @@
     "@fortawesome/fontawesome-svg-core": "^6.5.1",
     "@fortawesome/vue-fontawesome": "^3.0.6",
     "echarts": "^5.5.0",
+    "pinia": "^2.1.7",
     "vue": "^3.4.21",
     "vue3-echarts": "^1.1.0",
     "vuestic-ui": "^1.9.7"

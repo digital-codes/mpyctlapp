@@ -17,6 +17,10 @@ import '@fortawesome/fontawesome-free/css/all.min.css'
 import "./css/style.css"
 import "./css/fonts.css"
 
+// storage
+import { createPinia } from 'pinia'
+
+
 // fontawesome font setup
 const fonts = [
     {
@@ -51,6 +55,8 @@ const fonts = [
 const aliases = []
 
 const app = createApp(App)
+const pinia = createPinia()
+
 app.use(createVuestic({
     config: {
         icons: createIconsConfig({ aliases, fonts }),
@@ -62,6 +68,7 @@ app.use(createVuestic({
         colors: { /* ... */ },
       },    
 }))
+app.use(pinia)
 app.mount('#app')
 
 

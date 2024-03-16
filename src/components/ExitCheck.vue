@@ -12,6 +12,9 @@ const show = async () => {
         title: 'Really exit?',
         okText: "Yes",
         cancelText: "No",
+        noDismiss: true,
+        hideDefaultActions: false,
+        closeButton: false,
     })
     return exit
 }
@@ -22,4 +25,12 @@ defineExpose({
 
 
 </script>
+
+
+<style>
+.va-modal__close1 {
+    display: none;
+}
+
+</style>
 

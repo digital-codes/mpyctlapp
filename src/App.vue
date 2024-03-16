@@ -13,10 +13,21 @@ import { App as CApp } from "@capacitor/app";
 
 import { Device } from "@capacitor/device";
 
+// pinia
+import { useDeviceStore } from "./stores/BleDevices";
+import { storeToRefs } from 'pinia'
+const deviceStore = useDeviceStore()
+
 const logDeviceInfo = async () => {
   const info = await Device.getInfo();
   console.log(info);
 };
+
+const blekey = ref(deviceStore.devkey)
+const keyUpdate = () => {
+  console.log("Key updated:", blekey.value);
+  deviceStore.setDevkey(blekey.value);
+}
 
 const showSidebar = ref(false);
 const page = ref(1);
@@ -70,6 +81,25 @@ const handleRoverCheck = (payload) => {
   const ctl = getMotionCtl(123);
   viewCtl(ctl);
 };
+
+// ble emits
+const handleBleinit = (payload) => {
+  console.log("init:", payload)
+}
+const handleBleconnect = (payload) => {
+  console.log("conn:", payload)
+  deviceStore.setDevname(payload);
+  deviceStore.setConnected(true);
+}
+
+const handleBledisconnect = () => {
+  console.log("device disconnected")
+  deviceStore.setDevname("");
+  deviceStore.setConnected(false);
+}
+
+//
+
 const viewCtl = (val) => {
   const view = new DataView(val);
   for (let i = 0; i < 8; i++) {
@@ -85,10 +115,7 @@ const viewCtl = (val) => {
 
       <VaNavbar color="primary" class="py-2">
         <template #left>
-          <VaButton
-            :icon="showSidebar ? 'fa-xmark' : 'fa-bars'"
-            @click="menuToggle()"
-          />
+          <VaButton :icon="showSidebar ? 'fa-xmark' : 'fa-bars'" @click="menuToggle()" />
         </template>
         <template #center>
           <VaNavbarItem class="font-bold text-lg"> LOGO </VaNavbarItem>
@@ -105,27 +132,19 @@ const viewCtl = (val) => {
       <VaSidebar v-model="showSidebar" class="py-4">
         <VaSidebarItem :active="page === 1" @click="goto(1)">
           <VaSidebarItemContent>
-            <VaIcon name="fab-bluetooth-b"/>
+            <VaIcon name="fab-bluetooth-b" />
             <VaSidebarItemTitle> Home </VaSidebarItemTitle>
           </VaSidebarItemContent>
         </VaSidebarItem>
         <VaSidebarItem :active="page === 2" @click="goto(2)">
           <VaSidebarItemContent>
-            <VaIcon
-              name="fas-robot" 
-              size="large" 
-              spin="counter-clockwise"
-              color="secondary"
-            />
+            <VaIcon name="fas-robot" size="large" spin="counter-clockwise" color="secondary" />
             <VaSidebarItemTitle> Rover </VaSidebarItemTitle>
           </VaSidebarItemContent>
         </VaSidebarItem>
         <VaSidebarItem :active="page === 3" @click="goto(3)">
           <VaSidebarItemContent>
-            <VaIcon
-              name="fas-chart-line"
-              color="secondary"
-            />
+            <VaIcon name="fas-chart-line" color="secondary" />
             <VaSidebarItemTitle> Chart </VaSidebarItemTitle>
           </VaSidebarItemContent>
         </VaSidebarItem>
@@ -133,10 +152,28 @@ const viewCtl = (val) => {
     </template>
 
     <template #content>
-      <main v-if="page === 1" class="p-4">
+      <main v-show="page === 1" class="p-4">
         <h3 class="va-h3">Page 1</h3>
 
-        <BleScan></BleScan>
+        <BleScan
+          @init="handleBleinit"
+          @connected="handleBleconnect"
+          @disconnected="handleBledisconnect"
+        ></BleScan>
+        <div v-if="deviceStore.connected">
+          <p>Connected to device: {{ deviceStore.devname }}</p>
+          <div>
+            <VaInput 
+            va-warning
+            v-model="blekey"
+            @change="keyUpdate()"
+            type="\d{6,6}" label="Enter BLE Key" maxlength="6" minlength="6"
+            :rules="[(v) => v.length == 6 || `6 digits needed`]"
+            />
+          </div>
+          <p>BleKey: {{ blekey }}</p>
+          <p>DevKey: {{ deviceStore.devkey }}</p>
+        </div>
 
         <p>
           Page content must be wrapped in main tag. You must do it manually.
@@ -152,16 +189,13 @@ const viewCtl = (val) => {
           in nav tag.
         </p>
       </main>
-      <main v-else-if="page === 2" class="p-4">
+      <main v-show="page === 2" class="p-4">
         <h3 class="va-h3">Rover Control</h3>
-        <RoverCtl
-          @button-click="handleRoverButton"
-          @slider-change="handleRoverSlider"
-          @checkbox-change="handleRoverCheck"
-        >
+        <RoverCtl @button-click="handleRoverButton" @slider-change="handleRoverSlider"
+          @checkbox-change="handleRoverCheck">
         </RoverCtl>
       </main>
-      <main v-else-if="page === 3" class="p-4">
+      <main v-show="page === 3" class="p-4">
         <h3 class="va-h3">Page 3</h3>
         <p>
           Page content must be wrapped in main tag. You must do it manually.
@@ -201,10 +235,21 @@ const viewCtl = (val) => {
 .avatar {
   border: unset;
 }
+
+.va-input {
+  --va-input-font-size:1.5rem;
+}
+
 </style>
 
 <style>
 .va-modal__footer {
   display: block;
 }
+
+.va-input-label {
+  font-size: 1rem;
+}
+
+
 </style>

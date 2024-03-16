@@ -1,7 +1,10 @@
 <script setup>
 import { ref } from 'vue'
+import { defineEmits } from "vue";
 
 import { BleClient, numbersToDataView, numberToUUID } from '@capacitor-community/bluetooth-le';
+
+const emit = defineEmits(["init","connected", "disconnected"]);
 
 
 const AUTO_SRV = '00001815-0000-1000-8000-00805f9b34fb'
@@ -63,13 +66,16 @@ const blescan = async () => {
     await BleClient.initialize();
   } catch (e) {
     console.log("Error init BLE:",e)
+    emit("init", false)
     return
   }
   try {
     await BleClient.requestEnable()
   } catch (e) {
     console.log("Error enable BLE:",e.message)
+    emit("init", false)
   }
+  emit("init", true)
   try {
 
     console.log("DEV:", DEV_PREFIX)
@@ -88,6 +94,9 @@ const blescan = async () => {
     const msg = `device ${device.name} connected`
     console.log(device)
     status.value.innerHTML = msg
+    const name = device.name
+    emit("connected", name)
+
 
     const result = await BleClient.read(device.deviceId, SENSE_SRV, SENSE_RD);
     console.log('body sensor location', result.getUint8(0));
@@ -110,6 +119,7 @@ const blescan = async () => {
       await BleClient.stopNotifications(device.deviceId, SENSE_SRV, SENSE_RD);
       await BleClient.disconnect(device.deviceId);
       console.log('disconnected from device', device);
+      emit("disconnected")
     }, 10000);
   return 1  
   } catch (error) {
