@@ -32,6 +32,7 @@
     "vuestic-ui": "^1.9.7"
   },
   "devDependencies": {
+    "@capacitor/assets": "^3.0.4",
     "@capacitor/cli": "^5.7.2",
     "@vitejs/plugin-vue": "^5.0.4",
     "vite": "^5.1.6"
