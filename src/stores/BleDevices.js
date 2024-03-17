@@ -9,7 +9,16 @@ export const useDeviceStore = defineStore('device', {
         return {
             connected: false,
             devname: 'mpyctl',
-            devkey: '000000'
+            devkey: '000000',
+            device: {},
+            sensData: [],
+            configData: [],
+            digitalData: []
+        }
+    },
+    getters: {
+        getTemperature() {
+            return this.sensData[0] / 100 
         }
     },
     actions: {
@@ -22,6 +31,18 @@ export const useDeviceStore = defineStore('device', {
         },
         setConnected(c) {
             this.connected = c
+        },
+        setDevice(device) {
+            this.device = device
+        },
+        setSensData(data) {
+            this.sensData = data
+        },
+        setConfigData(data) {
+            this.configData = data
+        },
+        setDigitalData(data) {
+            this.digitalData = data
         }
     }
 })  // This is the store that will be used in the app

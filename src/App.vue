@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import logo from "./assets/imgs/logo.png";
 
 import BleScan from "./components/BleScan.vue";
@@ -15,8 +15,9 @@ import { Device } from "@capacitor/device";
 
 // pinia
 import { useDeviceStore } from "./stores/BleDevices";
-import { storeToRefs } from 'pinia'
 const deviceStore = useDeviceStore()
+
+import * as BleHandler from "./services/bleHandler"
 
 const logDeviceInfo = async () => {
   const info = await Device.getInfo();
@@ -35,6 +36,25 @@ const page = ref(1);
 const exitCheck = ref();
 
 const schart = ref();
+
+
+onMounted(async () => {
+  console.log("App mounted");
+  logDeviceInfo();
+  const bleOk = await BleHandler.bleInit() 
+  if (bleOk) {
+    console.log("Ble init ok")
+    //await BleHandler.bleConnect()
+  } else {
+    console.log("Ble init failed")
+  }
+}); 
+
+const getDevice = async () => {
+  await BleHandler.bleConnect()
+  await BleHandler.bleStartNotify()
+}
+
 
 const closeApp = async () => {
   console.log("Closing app");
@@ -154,12 +174,16 @@ const viewCtl = (val) => {
     <template #content>
       <main v-show="page === 1" class="p-4">
         <h3 class="va-h3">Page 1</h3>
-
+        <va-button ref="scan" @click="getDevice">scan</va-button>
+        <p>{{ deviceStore.getTemperature }}</p>
+        <!--
         <BleScan
           @init="handleBleinit"
           @connected="handleBleconnect"
           @disconnected="handleBledisconnect"
         ></BleScan>
+
+      -->
         <div v-if="deviceStore.connected">
           <p>Connected to device: {{ deviceStore.devname }}</p>
           <div>
