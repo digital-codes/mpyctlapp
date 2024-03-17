@@ -8,6 +8,7 @@ export const useDeviceStore = defineStore('device', {
     state: () => {
         return {
             connected: false,
+            paired: false,
             devname: 'mpyctl',
             devkey: '000000',
             device: {},
@@ -31,6 +32,10 @@ export const useDeviceStore = defineStore('device', {
         },
         setConnected(c) {
             this.connected = c
+            if (!c) this.paired = false // also clear pair
+        },
+        setPaired(paired) {
+            this.paired = paired && this.connected
         },
         setDevice(device) {
             this.device = device

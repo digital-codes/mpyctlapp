@@ -14,6 +14,14 @@ const AUTO_RD = '00002a56-0000-1000-8000-00805f9b34fb'
 const SENSE_SRV = '0000181a-0000-1000-8000-00805f9b34fb'
 const SENSE_RD = '00002a6e-0000-1000-8000-00805f9b34fb'
 
+const DEVICE_INFO_SRV = '0000180a-0000-1000-8000-00805f9b34fb';
+// custom characteristics to read and write config stuff
+const DEVICE_CONFIG_RD = "19e2282a-0777-4519-9d08-9bc983c3a7d0"
+const DEVICE_PAIR = "bda7b898-782a-4a50-8d10-79d897ea82c2"
+
+
+
+
 const DEV_PREFIX = 'MpyCtl'
 
 const BLE_DEFAULTS = {
@@ -96,7 +104,7 @@ const bleConnect = async () => {
         const device = await client.requestDevice({
             namePrefix: DEV_PREFIX,
             services: [SENSE_SRV],
-            optionalServices: [AUTO_SRV],
+            optionalServices: [AUTO_SRV, DEVICE_INFO_SRV],
           });
           console.log('Request result:', device);
           // connect to device, the onDisconnect callback is optional
@@ -145,33 +153,60 @@ const bleReadConfig = async () => {
     try {
         if (!store.fn.connected) throw new Error("No device connected")
         const device = store.fn.device
-        console.log("Current device:",device)
-        const result = await client.read(device.deviceId, SENSE_SRV, SENSE_RD);
-        console.log('sensor value', result.getUint8(0));
+        //console.log("Current device:",device)
+        const result = await client.read(device.deviceId, DEVICE_INFO_SRV, DEVICE_CONFIG_RD);
+        console.log("config length:",result.byteLength)
+        console.log('config value', result.getUint8(0));
         return result.getUint8(0)
     } catch (e) {
         console.log("Error ",e.message)
         return null
     }
 }
-const bleReadDigital = async () => {
+const bleReadPair = async () => {
     try {
         if (!store.fn.connected) throw new Error("No device connected")
         const device = store.fn.device
-        console.log("Current device:",device)
-        const result = await client.read(device.deviceId, SENSE_SRV, SENSE_RD);
-        console.log('sensor value', result.getUint8(0));
-        return result.getUint8(0)
+        //console.log("Current device:",device)
+        const result = await client.read(device.deviceId, DEVICE_INFO_SRV, DEVICE_PAIR);
+        console.log("pair length:",result.byteLength)
+        return result
     } catch (e) {
         console.log("Error ",e.message)
         return null
     }
 }
+const bleWritePair = async (data) => {
+    try {
+        if (!store.fn.connected) throw new Error("No device connected")
+        const device = store.fn.device
+        // Convert the 6 digit number to a Uint8Array, one byte per digit
+        let digits = Array.from(String(data), Number);
+        let cmd = new Uint8Array(digits);
+        await client.write(device.deviceId, DEVICE_INFO_SRV, DEVICE_PAIR, cmd);
+        await new Promise(resolve => setTimeout(resolve, 100));
+        // verify pairing
+        const r = await bleReadPair()
+        console.log("pair returned:",r)
+        for (let i = 0; i < r.byteLength; i++) {
+            if (r.getUint8(i) != cmd[i]) {
+                console.log("error at ",i)
+                throw new Error("Pairing failed")
+            }
+        }
+        store.fn.setDevkey(data);
+        store.fn.setPaired(true)
+    } catch (e) {
+        console.log("Error ",e.message)
+        return null
+    }
+}
+
 const bleStartNotify = async () => {
     try {
         if (!store.fn.connected) throw new Error("No device connected")
         const device = store.fn.device
-        console.log("Current device:",device)
+        //console.log("Current device:",device)
         await client.startNotifications(
             device.deviceId,
             SENSE_SRV,
@@ -187,14 +222,29 @@ const bleStartNotify = async () => {
         console.log("Error ",e.message)
     }
 }
+
 const bleStopNotify = async () => {
     try {
         if (!store.fn.connected) throw new Error("No device connected")
         const device = store.fn.device
-        console.log("Current device:",device)
+        //console.log("Current device:",device)
         await BleCliclientent.stopNotifications(device.deviceId, SENSE_SRV, SENSE_RD);
     } catch (e) {
         console.log("Error ",e.message)
+    }
+}
+
+const bleReadDigital = async () => {
+    try {
+        if (!store.fn.connected) throw new Error("No device connected")
+        const device = store.fn.device
+        //console.log("Current device:",device)
+        const result = await client.read(device.deviceId, AUTO_SRV, AUTO_RD);
+        console.log('sensor value', result.getUint8(0));
+        return result.getUint8(0)
+    } catch (e) {
+        console.log("Error ",e.message)
+        return null
     }
 }
 
@@ -202,10 +252,10 @@ const bleWriteDigital = async (data) => {
     try {
         if (!store.fn.connected) throw new Error("No device connected")
         const device = store.fn.device
-        console.log("Current device:",device)
+        //console.log("Current device:",device)
         let cmd = new Uint8Array([data]);
         await client.write(device.deviceId, AUTO_SRV, AUTO_WR, cmd);
-        console.log('daat written');
+        //console.log('data written');
     } catch (e) {
         console.log("Error ",e.message)
     }
@@ -222,6 +272,8 @@ export {
     bleStopNotify,
     bleStartNotify,
     bleReadConfig,
+    bleWritePair,
+    bleReadPair,
     bleReadSensor,
 }
 

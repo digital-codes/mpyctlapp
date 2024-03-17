@@ -1,8 +1,7 @@
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, watch } from "vue";
 import logo from "./assets/imgs/logo.png";
 
-import BleScan from "./components/BleScan.vue";
 import ExitCheck from "./components/ExitCheck.vue";
 import SimpleChart from "./components/SimpleChart.vue";
 import RoverCtl from "./components/RoverCtl.vue";
@@ -25,9 +24,21 @@ const logDeviceInfo = async () => {
 };
 
 const blekey = ref(deviceStore.devkey)
-const keyUpdate = () => {
+
+const keyUpdate = async () => {
   console.log("Key updated:", blekey.value);
-  deviceStore.setDevkey(blekey.value);
+}
+
+const pairDevice = async () => {
+  if (blekey.value.length != 6) {
+    console.log("Invalid key length")
+    return
+  }
+  console.log("Pairing device with ", blekey.value);
+  await BleHandler.bleWritePair(blekey.value)
+  if (deviceStore.paired) {
+    page.value = 2
+  }
 }
 
 const showSidebar = ref(false);
@@ -37,22 +48,41 @@ const exitCheck = ref();
 
 const schart = ref();
 
+const bleTgl = ref(0)
+
+watch(
+  () => deviceStore.sensData,
+  async (newVal, oldVal) => {
+    // console.log('sensor changed from', oldVal, 'to', newVal);
+    console.log('sensor changed from', oldVal[0], 'to', newVal[0]);
+    // You can add more actions here when devkey changes
+    await BleHandler.bleWriteDigital(bleTgl.value)
+    bleTgl.value = bleTgl.value ? 0 : 1
+  },
+  { deep: true }
+)
+
 
 onMounted(async () => {
   console.log("App mounted");
   logDeviceInfo();
-  const bleOk = await BleHandler.bleInit() 
+  const bleOk = await BleHandler.bleInit()
   if (bleOk) {
     console.log("Ble init ok")
     //await BleHandler.bleConnect()
   } else {
     console.log("Ble init failed")
   }
-}); 
+});
 
 const getDevice = async () => {
   await BleHandler.bleConnect()
   await BleHandler.bleStartNotify()
+}
+
+const dropDevice = async () => {
+  await BleHandler.bleStopNotify()
+  await BleHandler.bleDisconnect()
 }
 
 
@@ -102,22 +132,6 @@ const handleRoverCheck = (payload) => {
   viewCtl(ctl);
 };
 
-// ble emits
-const handleBleinit = (payload) => {
-  console.log("init:", payload)
-}
-const handleBleconnect = (payload) => {
-  console.log("conn:", payload)
-  deviceStore.setDevname(payload);
-  deviceStore.setConnected(true);
-}
-
-const handleBledisconnect = () => {
-  console.log("device disconnected")
-  deviceStore.setDevname("");
-  deviceStore.setConnected(false);
-}
-
 //
 
 const viewCtl = (val) => {
@@ -162,78 +176,49 @@ const viewCtl = (val) => {
             <VaSidebarItemTitle> Rover </VaSidebarItemTitle>
           </VaSidebarItemContent>
         </VaSidebarItem>
+        <!-- 
         <VaSidebarItem :active="page === 3" @click="goto(3)">
           <VaSidebarItemContent>
             <VaIcon name="fas-chart-line" color="secondary" />
             <VaSidebarItemTitle> Chart </VaSidebarItemTitle>
           </VaSidebarItemContent>
         </VaSidebarItem>
+        -->
       </VaSidebar>
     </template>
 
     <template #content>
       <main v-show="page === 1" class="p-4">
         <h3 class="va-h3">Page 1</h3>
-        <va-button ref="scan" @click="getDevice">scan</va-button>
+        <va-button ref="scan" v-if="!deviceStore.connected" @click="getDevice">Connect</va-button>
+        <va-button v-if="deviceStore.connected" @click="dropDevice">Disconnect</va-button>
         <p>{{ deviceStore.getTemperature }}</p>
-        <!--
-        <BleScan
-          @init="handleBleinit"
-          @connected="handleBleconnect"
-          @disconnected="handleBledisconnect"
-        ></BleScan>
-
-      -->
         <div v-if="deviceStore.connected">
           <p>Connected to device: {{ deviceStore.devname }}</p>
-          <div>
-            <VaInput 
-            va-warning
-            v-model="blekey"
-            @change="keyUpdate()"
-            type="\d{6,6}" label="Enter BLE Key" maxlength="6" minlength="6"
-            :rules="[(v) => v.length == 6 || `6 digits needed`]"
-            />
+          <div v-if="!deviceStore.paired">
+            <div>
+              <VaInput va-warning v-model="blekey" @change="keyUpdate()" type="\d{6,6}" label="Enter BLE Key"
+                maxlength="6" minlength="6" :rules="[(v) => v.length == 6 || `6 digits needed`]" />
+
+            </div>
+            <div>
+              <va-button v-if="(blekey.length == 6)" @click="pairDevice">Pair</va-button>
+
+            </div>
           </div>
-          <p>BleKey: {{ blekey }}</p>
-          <p>DevKey: {{ deviceStore.devkey }}</p>
         </div>
-
-        <p>
-          Page content must be wrapped in main tag. You must do it manually.
-          Here you can place any blocks you need in your application.
-        </p>
-
-        <p>
-          For example, you can place here your router view, add sidebar with
-          navigation in #left slot.
-        </p>
-        <p>
-          If you're using VaSidebar for page navigation don't forget to wrap it
-          in nav tag.
-        </p>
       </main>
       <main v-show="page === 2" class="p-4">
         <h3 class="va-h3">Rover Control</h3>
+        <div v-if="deviceStore.paired">
         <RoverCtl @button-click="handleRoverButton" @slider-change="handleRoverSlider"
           @checkbox-change="handleRoverCheck">
         </RoverCtl>
-      </main>
-      <main v-show="page === 3" class="p-4">
-        <h3 class="va-h3">Page 3</h3>
-        <p>
-          Page content must be wrapped in main tag. You must do it manually.
-          Here you can place any blocks you need in your application.
-        </p>
         <SimpleChart ref="schart"></SimpleChart>
-        <p>
-          For example, you can place here your router view, add sidebar with
-          navigation in #left slot.
-        </p>
-        <p>
-          If you're using VaSidebar for page navigation don't forget to wrap it
-          in nav tag.
-        </p>
+        </div>
+        <div v-else>
+          <p>Device not paired</p>
+        </div>
       </main>
     </template>
   </VaLayout>
@@ -261,9 +246,8 @@ const viewCtl = (val) => {
 }
 
 .va-input {
-  --va-input-font-size:1.5rem;
+  --va-input-font-size: 1.5rem;
 }
-
 </style>
 
 <style>
@@ -274,6 +258,4 @@ const viewCtl = (val) => {
 .va-input-label {
   font-size: 1rem;
 }
-
-
 </style>
