@@ -6,6 +6,9 @@ Tested on Android and Browser: Chrome on Android, Chromium on Linux, Bluefy on i
 
 
 # Android
+
+keystore in /home/kugel/daten/work/keystores/mypctl/android.jks
+
 when publishing new release, make sure to update version 
 
 > versionCode 1
