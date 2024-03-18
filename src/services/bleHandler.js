@@ -67,9 +67,57 @@ const onDisconnect = (deviceId) => {
     }
 }
 
+// shared key
+const keyStr = "0123456789ABCDEF";
+// shared iv
+const ivStr = "123456789ABCDEF0";
+
+// encrypt challenge
+const encryptChallenge = async (challenge) => {
+    if (window.crypto) {
+        console.log("Webcrypto available")
+        // Convert string to Uint8Array
+        const keyBytes = new TextEncoder().encode(keyStr);
+        console.log("Keybytes:",keyBytes)
+        // shared iv
+        // Convert string to Uint8Array
+        const ivBytes = new TextEncoder().encode(ivStr);
+        console.log("ivbytes:",ivBytes)
+        // crypto key from key data
+        const key = await crypto.subtle.importKey(
+            'raw', // Key format
+            keyBytes,
+            { name: 'AES-CBC', iv: ivBytes },
+            false, // Whether the key is extractable
+            ['encrypt'] // Key usage
+          );
+        console.log("Key:",key)
+        console.log("Data:",challenge)
+        // Encrypt data using AES-GCM algorithm
+        const encryptedData = await crypto.subtle.encrypt(
+            {
+                name: 'AES-CBC', 
+                iv: ivBytes
+            },
+            key,
+            challenge
+        );
+        console.log("Encrypted data:",new Uint8Array(encryptedData))
+        return new Uint8Array(encryptedData)
+    } else {
+        console.log("Webcrypto not available")
+        return null
+    }
+
+}
+
 // ----------------- BLE functions -----------------
 
 const bleInit = async () => {
+    // test crypto
+    const data = new Uint8Array([1,2,3,3,2,1]);
+    const enc = await encryptChallenge(data)
+    console.log("Encrypted:",enc)
     // set client
     client = BleClient
     // init store
@@ -188,6 +236,8 @@ const bleWritePair = async (data) => {
         // verify pairing
         const r = await bleReadPair()
         console.log("pair returned:",r)
+        const encryptedPair = await encryptChallenge(r)
+        console.log("Encrypted pair:",encryptedPair)
         for (let i = 0; i < r.byteLength; i++) {
             if (r.getUint8(i) != cmd[i]) {
                 console.log("error at ",i)
