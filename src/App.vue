@@ -11,6 +11,7 @@ import { getMotionCtl } from "./services/motionCtl";
 import { App as CApp } from "@capacitor/app";
 
 import { Device } from "@capacitor/device";
+import { Capacitor } from "@capacitor/core";
 
 // pinia
 import { useDeviceStore } from "./stores/BleDevices";
@@ -22,6 +23,10 @@ const logDeviceInfo = async () => {
   const info = await Device.getInfo();
   console.log(info);
 };
+
+// storage
+import { dbSet, dbCheck, dbRemove, dbKeys } from './services/dataBase'
+
 
 const blekey = ref(deviceStore.devkey)
 
@@ -66,6 +71,10 @@ watch(
 onMounted(async () => {
   console.log("App mounted");
   logDeviceInfo();
+
+  const platform = Capacitor.getPlatform();
+  console.log("Platform:", platform);
+
   const bleOk = await BleHandler.bleInit()
   if (bleOk) {
     console.log("Ble init ok")
@@ -73,6 +82,16 @@ onMounted(async () => {
   } else {
     console.log("Ble init failed")
   }
+  // database
+  await dbSet('test', 'test')
+  await dbSet('test1', {"a":1,"b":123,"c":{"a":[1,2,3]}}) 
+  const k = await dbKeys()
+  console.log("Keys:",k)
+  console.log(await dbCheck('test'))
+  console.log(await dbCheck('test1'))
+  console.log(await dbCheck('test2'))
+  await dbRemove('test')
+  console.log(await dbCheck('test'))
 });
 
 const getDevice = async () => {

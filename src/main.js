@@ -20,7 +20,6 @@ import "./css/fonts.css"
 // storage
 import { createPinia } from 'pinia'
 
-
 // fontawesome font setup
 const fonts = [
     {
