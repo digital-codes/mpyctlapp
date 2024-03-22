@@ -27,20 +27,9 @@ const logDeviceInfo = async () => {
 // storage
 import { dbSet, dbCheck, dbRemove, dbKeys } from './services/dataBase'
 
+const deviceFiles = ref([]);
 
-const blekey = ref(deviceStore.devkey)
-
-
-const pairDevice = async () => {
-  if (blekey.value.length != 6) {
-    console.log("Invalid key length")
-    return
-  }
-  //await BleHandler.bleWritePair()
-  if (deviceStore.paired) {
-    page.value = 2
-  }
-}
+const knownDevices = ref([]);
 
 const showSidebar = ref(false);
 const page = ref(1);
@@ -63,6 +52,44 @@ watch(
   { deep: true }
 )
 
+watch(
+  () => deviceFiles.value,
+  async (newVal, oldVal) => {
+    console.log('Devices', newVal);
+    try {
+      const file = newVal[0]; // Get the first file
+
+      if (!file) {
+        console.log('No file selected!');
+        return;
+      }
+
+      const reader = new FileReader();
+
+      // Setup onload event for reader
+      reader.onload = async (e) => {
+        // The file's text will be printed here
+        const dev = JSON.parse(e.target.result)
+        console.log("Content...:", dev)
+        for (const d in dev) {
+          console.log("Name:", dev[d].name)
+          // config is a string!
+          const cfg = JSON.parse(dev[d].config)
+          console.log("Key:", cfg.ble.key)
+          await dbSet(dev[d].name, cfg.ble.key)
+          knownDevices.value.push(dev[d].name)
+
+        }
+        deviceFiles.value = [] // close field
+      };
+      // Read the file as text
+      await reader.readAsText(file);
+    } catch (error) {
+      console.log("Error:", error)
+    }
+  }
+)
+
 
 onMounted(async () => {
   console.log("App mounted");
@@ -80,9 +107,9 @@ onMounted(async () => {
   // preference database
   // set key for mpyctl_0001
   const devId = "MpyCtl_0001"
-  await dbSet(devId,"ee540e93c07e27db8da1648ed27214dd")
+  await dbSet(devId, "ee540e93c07e27db8da1648ed27214dd")
   const k = await dbKeys()
-  console.log("Keys:",k)
+  console.log("Keys:", k)
   console.log(await dbCheck(devId))
 });
 
@@ -216,14 +243,27 @@ const viewCtl = (val) => {
             <p>Device not paired</p>
           </div>
         </div>
+        <div v-else class="upload">
+          <p>Upload Devices</p>
+          <VaFileUpload v-model="deviceFiles" file-types="json" />
+        </div>
+        <div class="devlist">
+          <VaList>
+            <VaListItem v-for="(item,idx) in knownDevices" :key="idx">
+              <VaListItemContent>
+                <VaListItemTitle>{{ item }}</VaListItemTitle>
+              </VaListItemContent>
+            </VaListItem>
+          </VaList>
+        </div>
       </main>
       <main v-show="page === 2" class="p-4">
         <h3 class="va-h3">Rover Control</h3>
         <div v-if="deviceStore.paired">
-        <RoverCtl @button-click="handleRoverButton" @slider-change="handleRoverSlider"
-          @checkbox-change="handleRoverCheck">
-        </RoverCtl>
-        <SimpleChart ref="schart"></SimpleChart>
+          <RoverCtl @button-click="handleRoverButton" @slider-change="handleRoverSlider"
+            @checkbox-change="handleRoverCheck">
+          </RoverCtl>
+          <SimpleChart ref="schart"></SimpleChart>
         </div>
         <div v-else>
           <p>Device not paired</p>
@@ -254,9 +294,14 @@ const viewCtl = (val) => {
   border: unset;
 }
 
+.devlist {
+  margin: 10px auto;
+}
+
 .va-input {
   --va-input-font-size: 1.5rem;
 }
+
 </style>
 
 <style>
@@ -267,4 +312,10 @@ const viewCtl = (val) => {
 .va-input-label {
   font-size: 1rem;
 }
+
+.upload > .va-file-upload > .va-file-upload__field {
+  display:unset;
+}
+
+
 </style>
