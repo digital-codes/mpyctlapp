@@ -30,17 +30,13 @@ import { dbSet, dbCheck, dbRemove, dbKeys } from './services/dataBase'
 
 const blekey = ref(deviceStore.devkey)
 
-const keyUpdate = async () => {
-  console.log("Key updated:", blekey.value);
-}
 
 const pairDevice = async () => {
   if (blekey.value.length != 6) {
     console.log("Invalid key length")
     return
   }
-  console.log("Pairing device with ", blekey.value);
-  await BleHandler.bleWritePair(blekey.value)
+  //await BleHandler.bleWritePair()
   if (deviceStore.paired) {
     page.value = 2
   }
@@ -78,25 +74,27 @@ onMounted(async () => {
   const bleOk = await BleHandler.bleInit()
   if (bleOk) {
     console.log("Ble init ok")
-    //await BleHandler.bleConnect()
   } else {
     console.log("Ble init failed")
   }
-  // database
-  await dbSet('test', 'test')
-  await dbSet('test1', {"a":1,"b":123,"c":{"a":[1,2,3]}}) 
+  // preference database
+  // set key for mpyctl_0001
+  const devId = "MpyCtl_0001"
+  await dbSet(devId,"ee540e93c07e27db8da1648ed27214dd")
   const k = await dbKeys()
   console.log("Keys:",k)
-  console.log(await dbCheck('test'))
-  console.log(await dbCheck('test1'))
-  console.log(await dbCheck('test2'))
-  await dbRemove('test')
-  console.log(await dbCheck('test'))
+  console.log(await dbCheck(devId))
 });
 
 const getDevice = async () => {
   await BleHandler.bleConnect()
-  await BleHandler.bleStartNotify()
+  if (deviceStore.connected) {
+    await BleHandler.bleWritePair()
+    if (deviceStore.paired) {
+      await BleHandler.bleStartNotify()
+      page.value = 2
+    }
+  }
 }
 
 const dropDevice = async () => {
@@ -215,15 +213,7 @@ const viewCtl = (val) => {
         <div v-if="deviceStore.connected">
           <p>Connected to device: {{ deviceStore.devname }}</p>
           <div v-if="!deviceStore.paired">
-            <div>
-              <VaInput va-warning v-model="blekey" @change="keyUpdate()" type="\d{6,6}" label="Enter BLE Key"
-                maxlength="6" minlength="6" :rules="[(v) => v.length == 6 || `6 digits needed`]" />
-
-            </div>
-            <div>
-              <va-button v-if="(blekey.length == 6)" @click="pairDevice">Pair</va-button>
-
-            </div>
+            <p>Device not paired</p>
           </div>
         </div>
       </main>

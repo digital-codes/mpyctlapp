@@ -4,6 +4,9 @@ import { BleClient, numbersToDataView, numberToUUID } from '@capacitor-community
 
 import { useDeviceStore } from "../stores/BleDevices";
 
+// device storage
+import { dbCheck } from '../services/dataBase'
+
 // store placeholder. must be initialized in bleInit
 const store = {fn:()=>{alert("store not initialized")}}
 
@@ -67,27 +70,33 @@ const onDisconnect = (deviceId) => {
     }
 }
 
-// shared key
-const keyStr = "0123456789ABCDEF";
 // shared iv
-const ivStr = "123456789ABCDEF0";
+const ivBase = new Uint8Array([0,0,0,0,0,0,0,0,0,0,0,0])
 
 // encrypt challenge
-const encryptChallenge = async (challenge) => {
+const encryptChallenge = async (challenge,hexKey) => {
     if (window.crypto) {
         console.log("Webcrypto available")
         // Convert string to Uint8Array
-        const keyBytes = new TextEncoder().encode(keyStr);
+        const keyBytes = [];
+        for (let i = 0; i < hexKey.length; i += 2) {
+            keyBytes.push(parseInt(hexKey.substr(i, 2), 16));
+        }
         console.log("Keybytes:",keyBytes)
+        const keyBuf = new Uint8Array(keyBytes)
         // shared iv
         // Convert string to Uint8Array
-        const ivBytes = new TextEncoder().encode(ivStr);
-        console.log("ivbytes:",ivBytes)
+        const ivPart = crypto.getRandomValues(new Uint8Array(4));
+        console.log("ivpart:",ivPart)
+        console.log("ivbase:",ivBase)
+        const iv = new Uint8Array([...ivBase, ...ivPart]) //new Uint8Array(ivBase + ivBase)
+        console.log("ivbytes:",iv,iv.length)
+        console.log("iv:",Array.from(iv, byte => ('0' + (byte & 0xFF).toString(16)).slice(-2)).join(''))
         // crypto key from key data
         const key = await crypto.subtle.importKey(
             'raw', // Key format
-            keyBytes,
-            { name: 'AES-CBC', iv: ivBytes },
+            keyBuf,
+            { name: 'AES-CBC', iv: iv },
             false, // Whether the key is extractable
             ['encrypt'] // Key usage
           );
@@ -97,13 +106,16 @@ const encryptChallenge = async (challenge) => {
         const encryptedData = await crypto.subtle.encrypt(
             {
                 name: 'AES-CBC', 
-                iv: ivBytes
+                iv: iv
             },
             key,
             challenge
         );
-        console.log("Encrypted data:",new Uint8Array(encryptedData))
-        return new Uint8Array(encryptedData)
+        const enc = new Uint8Array(encryptedData)
+        console.log("Encrypted data:",enc)
+        const msg = new Uint8Array([...enc, ...ivPart])
+        console.log("Msg:",Array.from(msg, byte => ('0' + (byte & 0xFF).toString(16)).slice(-2)).join(''))
+        return msg
     } else {
         console.log("Webcrypto not available")
         return null
@@ -115,8 +127,8 @@ const encryptChallenge = async (challenge) => {
 
 const bleInit = async () => {
     // test crypto
-    const data = new Uint8Array([1,2,3,3,2,1]);
-    const enc = await encryptChallenge(data)
+    const data = new Uint8Array([1,2,3,0]);
+    const enc = await encryptChallenge(data,"1234567890abcdef1234567890abcdef")
     console.log("Encrypted:",enc)
     // set client
     client = BleClient
@@ -218,33 +230,32 @@ const bleReadPair = async () => {
         //console.log("Current device:",device)
         const result = await client.read(device.deviceId, DEVICE_INFO_SRV, DEVICE_PAIR);
         console.log("pair length:",result.byteLength)
-        return result
+        const pin = new Uint8Array(result.buffer)
+        console.log('pin value', pin);
+        return pin
     } catch (e) {
         console.log("Error ",e.message)
         return null
     }
 }
-const bleWritePair = async (data) => {
+const bleWritePair = async () => {
     try {
         if (!store.fn.connected) throw new Error("No device connected")
         const device = store.fn.device
-        // Convert the 6 digit number to a Uint8Array, one byte per digit
-        let digits = Array.from(String(data), Number);
-        let cmd = new Uint8Array(digits);
-        await client.write(device.deviceId, DEVICE_INFO_SRV, DEVICE_PAIR, cmd);
-        await new Promise(resolve => setTimeout(resolve, 100));
-        // verify pairing
-        const r = await bleReadPair()
-        console.log("pair returned:",r)
-        const encryptedPair = await encryptChallenge(r)
-        console.log("Encrypted pair:",encryptedPair)
-        for (let i = 0; i < r.byteLength; i++) {
-            if (r.getUint8(i) != cmd[i]) {
-                console.log("error at ",i)
-                throw new Error("Pairing failed")
-            }
+        console.log("Current device:",device.name)
+        // find key for device
+        const key = await dbCheck(device.name)
+        if (key == null) {
+            throw new Error("No key found for device")
         }
-        store.fn.setDevkey(data);
+        console.log("Key:",key)
+        const r = await bleReadPair()
+        console.log("pair1 returned:",r)
+        const encryptedPair = await encryptChallenge(r,key)
+        console.log("Encrypted pair:",encryptedPair,encryptedPair.length)
+        await client.write(device.deviceId, DEVICE_INFO_SRV, DEVICE_PAIR, encryptedPair);
+        await new Promise(resolve => setTimeout(resolve, 100));
+        //store.fn.setDevkey(data);
         store.fn.setPaired(true)
     } catch (e) {
         console.log("Error ",e.message)
