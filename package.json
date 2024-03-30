@@ -22,6 +22,7 @@
     "@capacitor/browser": "^5.2.0",
     "@capacitor/core": "^5.7.2",
     "@capacitor/device": "^5.0.7",
+    "@capacitor/ios": "^5.7.4",
     "@capacitor/preferences": "^5.0.7",
     "@capacitor/splash-screen": "^5.0.7",
     "@fortawesome/fontawesome-free": "^6.5.1",
@@ -34,9 +35,9 @@
     "vuestic-ui": "^1.9.7"
   },
   "devDependencies": {
-    "@capacitor/assets": "^3.0.4",
-    "@capacitor/cli": "^5.7.2",
+    "@capacitor/assets": "^3.0.5",
+    "@capacitor/cli": "^5.7.4",
     "@vitejs/plugin-vue": "^5.0.4",
-    "vite": "^5.1.6"
+    "vite": "^5.2.7"
   }
 }
