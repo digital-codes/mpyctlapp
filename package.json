@@ -32,7 +32,7 @@
     "pinia": "^2.1.7",
     "vue": "^3.4.21",
     "vue3-echarts": "^1.1.0",
-    "vuestic-ui": "^1.9.7"
+    "vuestic-ui": "^1.9.8"
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
