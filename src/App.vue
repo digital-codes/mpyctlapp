@@ -73,8 +73,12 @@ watch(
         console.log("Content...:", dev)
         for (const d in dev) {
           console.log("Name:", dev[d].name)
-          // config is a string!
-          const cfg = JSON.parse(dev[d].config)
+          // get config, string encoded or raw object
+          let cfg = dev[d].config
+          if (!(typeof cfg === 'object' && cfg !== null)) {
+            // config is a string!
+            cfg = JSON.parse(dev[d].config)
+          }
           console.log("Key:", cfg.ble.key)
           await dbSet(dev[d].name, cfg.ble.key)
           knownDevices.value.push(dev[d].name)
