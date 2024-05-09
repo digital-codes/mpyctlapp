@@ -16,28 +16,28 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@capacitor-community/bluetooth-le": "^3.1.2",
-    "@capacitor/android": "^5.7.2",
-    "@capacitor/app": "^5.0.7",
-    "@capacitor/browser": "^5.2.0",
-    "@capacitor/core": "^5.7.2",
-    "@capacitor/device": "^5.0.7",
-    "@capacitor/ios": "^5.7.4",
-    "@capacitor/preferences": "^5.0.7",
-    "@capacitor/splash-screen": "^5.0.7",
+    "@capacitor-community/bluetooth-le": "^6.0.0",
+    "@capacitor/android": "^6.0.0",
+    "@capacitor/app": "^6.0.0",
+    "@capacitor/browser": "^6.0.0",
+    "@capacitor/core": "^6.0.0",
+    "@capacitor/device": "^6.0.0",
+    "@capacitor/ios": "^6.0.0",
+    "@capacitor/preferences": "^6.0.0",
+    "@capacitor/splash-screen": "^6.0.0",
     "@fortawesome/fontawesome-free": "^6.5.1",
     "@fortawesome/fontawesome-svg-core": "^6.5.1",
     "@fortawesome/vue-fontawesome": "^3.0.6",
     "echarts": "^5.5.0",
     "pinia": "^2.1.7",
-    "vue": "^3.4.21",
+    "vue": "^3.4.27",
     "vue3-echarts": "^1.1.0",
-    "vuestic-ui": "^1.9.8"
+    "vuestic-ui": "^1.9.10"
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
-    "@capacitor/cli": "^5.7.4",
+    "@capacitor/cli": "^6.0.0",
     "@vitejs/plugin-vue": "^5.0.4",
-    "vite": "^5.2.7"
+    "vite": "^5.2.11"
   }
 }
