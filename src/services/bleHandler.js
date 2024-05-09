@@ -274,8 +274,10 @@ const bleStartNotify = async () => {
             SENSE_RD,
             (value) => {
               //emit("notify", value)
-              console.log('sensor value',value.getUint16(0,true) );
-              store.fn.setSensData([value.getUint16(0,true)])
+              //console.log('sensor value',value.getUint16(0,true) );
+              //store.fn.setSensData([value.getUint16(0,true)])
+              console.log('sensor value',value.getInt16(0,true) );
+              store.fn.setSensData([value.getInt16(0,true)])
             }
           );
         // const sensVal = value.getUint16(0, true)/100
