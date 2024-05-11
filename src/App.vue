@@ -122,6 +122,8 @@ const getDevice = async () => {
   if (deviceStore.connected) {
     await BleHandler.bleWritePair()
     if (deviceStore.paired) {
+      const cfg = await BleHandler.bleReadConfig()
+      console.log("Config: ",cfg)
       await BleHandler.bleStartNotify()
       page.value = 2
     }
