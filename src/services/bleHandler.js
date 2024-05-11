@@ -276,6 +276,8 @@ const bleStartNotify = async () => {
               //emit("notify", value)
               //console.log('sensor value',value.getUint16(0,true) );
               //store.fn.setSensData([value.getUint16(0,true)])
+              console.log('notify len:',value.byteLength);
+              // we can iterate over input data
               console.log('sensor value',value.getInt16(0,true) );
               store.fn.setSensData([value.getInt16(0,true)])
             }
@@ -316,7 +318,7 @@ const bleWriteDigital = async (data) => {
         if (!store.fn.connected) throw new Error("No device connected")
         const device = store.fn.device
         //console.log("Current device:",device)
-        let cmd = new Uint8Array([data]);
+        let cmd = new Uint8Array([data,1,2,3,4,5]);
         await client.write(device.deviceId, AUTO_SRV, AUTO_WR, cmd);
         //console.log('data written');
     } catch (e) {
