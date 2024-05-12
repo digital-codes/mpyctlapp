@@ -27,6 +27,13 @@ const logDeviceInfo = async () => {
 // storage
 import { dbSet, dbCheck, dbRemove, dbKeys } from './services/dataBase'
 
+import { defineAsyncComponent } from 'vue'
+/*
+const AsyncComp = defineAsyncComponent(() =>
+  import('./components/MyComponent.vue')
+)
+*/
+
 const deviceFiles = ref([]);
 
 const knownDevices = ref([]);
