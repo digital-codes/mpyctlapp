@@ -293,7 +293,7 @@ const bleStopNotify = async () => {
         if (!store.fn.connected) throw new Error("No device connected")
         const device = store.fn.device
         //console.log("Current device:",device)
-        await BleCliclientent.stopNotifications(device.deviceId, SENSE_SRV, SENSE_RD);
+        await BleClient.stopNotifications(device.deviceId, SENSE_SRV, SENSE_RD);
     } catch (e) {
         console.log("Error ",e.message)
     }
