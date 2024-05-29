@@ -228,7 +228,7 @@ const bleReadPair = async () => {
         if (!store.fn.connected) throw new Error("No device connected")
         const device = store.fn.device
         //console.log("Current device:",device)
-        const result = await client.read(device.deviceId, DEVICE_INFO_SRV, DEVICE_PAIR);
+        const result = await client.read(device.deviceId, AUTO_SRV, DEVICE_PAIR);
         console.log("pair length:",result.byteLength)
         const pin = new Uint8Array(result.buffer)
         console.log('pin value', pin);
@@ -253,7 +253,7 @@ const bleWritePair = async () => {
         console.log("pair1 returned:",r)
         const encryptedPair = await encryptChallenge(r,key)
         console.log("Encrypted pair:",encryptedPair,encryptedPair.length)
-        await client.write(device.deviceId, DEVICE_INFO_SRV, DEVICE_PAIR, encryptedPair);
+        await client.write(device.deviceId, AUTO_SRV, DEVICE_PAIR, encryptedPair);
         await new Promise(resolve => setTimeout(resolve, 100));
         //store.fn.setDevkey(data);
         store.fn.setPaired(true)
