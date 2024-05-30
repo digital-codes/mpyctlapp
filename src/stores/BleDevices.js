@@ -10,7 +10,7 @@ export const useDeviceStore = defineStore('device', {
             connected: false,
             paired: false,
             devname: 'mpyctl',
-            devkey: '000000',
+            devkey: '',
             device: {},
             sensData: [],
             configData: [],

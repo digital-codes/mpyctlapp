@@ -1,6 +1,5 @@
 <script setup>
 import { ref } from 'vue'
-import { defineEmits } from "vue";
 
 import { BleClient, numbersToDataView, numberToUUID } from '@capacitor-community/bluetooth-le';
 

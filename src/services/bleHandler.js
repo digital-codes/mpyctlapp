@@ -123,6 +123,54 @@ const encryptChallenge = async (challenge,hexKey) => {
 
 }
 
+// decrypt message + 4 bytes iv (partial)
+const decryptWithIv = async (msg) => {
+    if (window.crypto) {
+        const data = msg.slice(0,16)
+        const ivPart = new Uint8Array(msg.slice(16,20))
+        const hexKey = store.fn.devkey
+        const keyBytes = [];
+        for (let i = 0; i < hexKey.length; i += 2) {
+            keyBytes.push(parseInt(hexKey.substr(i, 2), 16));
+        }
+        console.log("Keybytes:",keyBytes)
+        const keyBuf = new Uint8Array(keyBytes)
+
+        console.log("ivpart:",ivPart)
+        console.log("ivbase:",ivBase)
+        const iv = new Uint8Array([...ivBase, ...ivPart]) //new Uint8Array(ivBase + ivBase)
+        // const iv = new Uint8Array(ivBase + ivBase)
+        console.log("ivbytes:",iv,iv.length)
+
+        // crypto key from key data
+        const key = await crypto.subtle.importKey(
+            'raw', // Key format
+            keyBuf,
+            { name: 'AES-CBC', iv: iv },
+            false, // Whether the key is extractable
+            ['decrypt'] // Key usage
+          );
+        console.log("Key:",key)
+        console.log("Data:",data)
+        // Encrypt data using AES-GCM algorithm
+        const decryptedData = await crypto.subtle.decrypt(
+            {
+                name: 'AES-CBC', 
+                iv: iv
+            },
+            key,
+            data
+        );
+        console.log("Decrypted data:",decryptedData)
+        return decryptedData
+    } else {
+        console.log("Webcrypto not available")
+        return null
+    }
+
+}
+
+
 // ----------------- BLE functions -----------------
 
 const bleInit = async () => {
@@ -255,8 +303,9 @@ const bleWritePair = async () => {
         console.log("Encrypted pair:",encryptedPair,encryptedPair.length)
         await client.write(device.deviceId, AUTO_SRV, DEVICE_PAIR, encryptedPair);
         await new Promise(resolve => setTimeout(resolve, 100));
-        //store.fn.setDevkey(data);
+        store.fn.setDevkey(key)
         store.fn.setPaired(true)
+        console.log("Session key:",store.fn.devkey)
     } catch (e) {
         console.log("Error ",e.message)
         return null
@@ -272,14 +321,19 @@ const bleStartNotify = async () => {
             device.deviceId,
             SENSE_SRV,
             SENSE_RD,
-            (value) => {
+            async (value) => {
               //emit("notify", value)
               //console.log('sensor value',value.getUint16(0,true) );
               //store.fn.setSensData([value.getUint16(0,true)])
               console.log('notify len:',value.byteLength);
               // we can iterate over input data
-              console.log('sensor value',value.getInt16(0,true) );
-              store.fn.setSensData([value.getInt16(0,true)])
+              // console.log('sensor value',value.getInt16(0,true) );
+              const decrypedData = await decryptWithIv(value.buffer)
+              console.log('decrypted value(s)',decrypedData);
+              // now we need the personality to analyze the buffer ...
+              const sensData = new DataView(decrypedData).getInt16(0,true)
+              // store.fn.setSensData([value.getInt16(0,true)])
+              store.fn.setSensData([sensData])
             }
           );
         // const sensVal = value.getUint16(0, true)/100
@@ -319,7 +373,9 @@ const bleWriteDigital = async (data) => {
         const device = store.fn.device
         //console.log("Current device:",device)
         let cmd = new Uint8Array([data,1,2,3,4,5]);
-        await client.write(device.deviceId, AUTO_SRV, AUTO_WR, cmd);
+        //await client.write(device.deviceId, AUTO_SRV, AUTO_WR, cmd);
+        const encryptedCmd = await encryptChallenge(cmd,store.fn.devkey)
+        await client.write(device.deviceId, AUTO_SRV, AUTO_WR, encryptedCmd);
         //console.log('data written');
     } catch (e) {
         console.log("Error ",e.message)
