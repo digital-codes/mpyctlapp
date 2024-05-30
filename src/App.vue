@@ -4,7 +4,7 @@ import logo from "./assets/imgs/logo.png";
 
 import ExitCheck from "./components/ExitCheck.vue";
 import SimpleChart from "./components/SimpleChart.vue";
-import RoverCtl from "./components/RoverCtl.vue";
+//import RoverCtl from "./components/RoverCtl.vue";
 
 import { getMotionCtl } from "./services/motionCtl";
 
@@ -33,6 +33,9 @@ const AsyncComp = defineAsyncComponent(() =>
   import('./components/MyComponent.vue')
 )
 */
+const RoverCtl = defineAsyncComponent(() =>
+  import('./components/personalities/RoverCar.vue') 
+)
 
 const deviceFiles = ref([]);
 
@@ -263,9 +266,9 @@ const viewCtl = (val) => {
         <div class="devlist">
           <VaList>
             <VaListItem v-for="(item,idx) in knownDevices" :key="idx">
-              <VaListItemContent>
-                <VaListItemTitle>{{ item }}</VaListItemTitle>
-              </VaListItemContent>
+              <VaListItemSection>
+                <VaListItemLabel>{{ item }}</VaListItemLabel>
+              </VaListItemSection>
             </VaListItem>
           </VaList>
         </div>

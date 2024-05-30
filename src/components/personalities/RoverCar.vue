@@ -38,21 +38,10 @@
       >
       </va-checkbox>
     </div>
-    <div class="dtgrid">
-      <va-input
-        v-for="value in sensdata"
-        :key="sensdata.id"
-        :label="sensdata.label"
-        v-model="sensdata.value"
-        disabled
-        mask="numeral"
-        input-class="va-text-right"
-        class="mr-3"
-        color="primary"
-      >
-      </va-input>
-    </div>
-  </div>
+
+    <VaDataTable :items="sensdata" />
+
+</div>
 </template>
 
 <script setup>
@@ -96,8 +85,8 @@ const checkboxes = ref([
 ]);
 
 const sensdata = ref([
-  { id: 1, value: 0, label: "Temperature" },
-  { id: 2, value: 0, label: "Other" }
+  { label: "Temperature",value: 0 },
+  { label: "Other", value: 10 }
 ])
 
 const handleClick = (button) => {
@@ -150,13 +139,6 @@ const handleCheckboxChange = (id, checked) => {
   grid-template-columns: repeat(2, 1fr);
   grid-gap: 10px;
 }
-.dtgrid {
-  /* data */
-  margin-top: 2rem;
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-gap: 10px;
-}
 
 .double-width {
     grid-column: span 2; /* Makes the item span two columns */
@@ -172,9 +154,10 @@ button {
 }
 
 .va-checkbox {
-  text-align: center;
+  text-align: left;
   grid-column: span 1;
-  margin:auto
+  margin:auto;
+  padding: 1rem 1rem 0 1rem
 }
 
 @media (max-width: 500px) {
