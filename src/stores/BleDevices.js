@@ -14,7 +14,7 @@ export const useDeviceStore = defineStore('device', {
             device: {},
             sensData: [],
             configData: [],
-            digitalData: []
+            ctlData: []
         }
     },
     getters: {
@@ -46,8 +46,8 @@ export const useDeviceStore = defineStore('device', {
         setConfigData(data) {
             this.configData = data
         },
-        setDigitalData(data) {
-            this.digitalData = data
+        setCtlData(data) {
+            this.ctlData = data
         }
     }
 })  // This is the store that will be used in the app
