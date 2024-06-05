@@ -76,22 +76,22 @@ const ivBase = new Uint8Array([0,0,0,0,0,0,0,0,0,0,0,0])
 // encrypt challenge
 const encryptChallenge = async (challenge,hexKey) => {
     if (window.crypto) {
-        console.log("Webcrypto available")
+        // console.log("Webcrypto available")
         // Convert string to Uint8Array
         const keyBytes = [];
         for (let i = 0; i < hexKey.length; i += 2) {
             keyBytes.push(parseInt(hexKey.substr(i, 2), 16));
         }
-        console.log("Keybytes:",keyBytes)
+        //console.log("Keybytes:",keyBytes)
         const keyBuf = new Uint8Array(keyBytes)
         // shared iv
         // Convert string to Uint8Array
         const ivPart = crypto.getRandomValues(new Uint8Array(4));
-        console.log("ivpart:",ivPart)
-        console.log("ivbase:",ivBase)
+        //console.log("ivpart:",ivPart)
+        //console.log("ivbase:",ivBase)
         const iv = new Uint8Array([...ivBase, ...ivPart]) //new Uint8Array(ivBase + ivBase)
-        console.log("ivbytes:",iv,iv.length)
-        console.log("iv:",Array.from(iv, byte => ('0' + (byte & 0xFF).toString(16)).slice(-2)).join(''))
+        //console.log("ivbytes:",iv,iv.length)
+        //console.log("iv:",Array.from(iv, byte => ('0' + (byte & 0xFF).toString(16)).slice(-2)).join(''))
         // crypto key from key data
         const key = await crypto.subtle.importKey(
             'raw', // Key format
@@ -100,8 +100,8 @@ const encryptChallenge = async (challenge,hexKey) => {
             false, // Whether the key is extractable
             ['encrypt'] // Key usage
           );
-        console.log("Key:",key)
-        console.log("Data:",challenge)
+        //console.log("Key:",key)
+        //console.log("Data:",challenge)
         // Encrypt data using AES-GCM algorithm
         const encryptedData = await crypto.subtle.encrypt(
             {
@@ -112,9 +112,9 @@ const encryptChallenge = async (challenge,hexKey) => {
             challenge
         );
         const enc = new Uint8Array(encryptedData)
-        console.log("Encrypted data:",enc)
+        //console.log("Encrypted data:",enc)
         const msg = new Uint8Array([...enc, ...ivPart])
-        console.log("Msg:",Array.from(msg, byte => ('0' + (byte & 0xFF).toString(16)).slice(-2)).join(''))
+        //console.log("Msg:",Array.from(msg, byte => ('0' + (byte & 0xFF).toString(16)).slice(-2)).join(''))
         return msg
     } else {
         console.log("Webcrypto not available")
@@ -133,14 +133,14 @@ const decryptWithIv = async (msg) => {
         for (let i = 0; i < hexKey.length; i += 2) {
             keyBytes.push(parseInt(hexKey.substr(i, 2), 16));
         }
-        console.log("Keybytes:",keyBytes)
+        //console.log("Keybytes:",keyBytes)
         const keyBuf = new Uint8Array(keyBytes)
 
-        console.log("ivpart:",ivPart)
-        console.log("ivbase:",ivBase)
+        //console.log("ivpart:",ivPart)
+        //console.log("ivbase:",ivBase)
         const iv = new Uint8Array([...ivBase, ...ivPart]) //new Uint8Array(ivBase + ivBase)
         // const iv = new Uint8Array(ivBase + ivBase)
-        console.log("ivbytes:",iv,iv.length)
+        //console.log("ivbytes:",iv,iv.length)
 
         // crypto key from key data
         const key = await crypto.subtle.importKey(
@@ -150,8 +150,8 @@ const decryptWithIv = async (msg) => {
             false, // Whether the key is extractable
             ['decrypt'] // Key usage
           );
-        console.log("Key:",key)
-        console.log("Data:",data)
+        //console.log("Key:",key)
+        //console.log("Data:",data)
         // Encrypt data using AES-GCM algorithm
         const decryptedData = await crypto.subtle.decrypt(
             {
@@ -161,7 +161,7 @@ const decryptWithIv = async (msg) => {
             key,
             data
         );
-        console.log("Decrypted data:",decryptedData)
+        //console.log("Decrypted data:",decryptedData)
         return decryptedData
     } else {
         console.log("Webcrypto not available")
@@ -264,8 +264,20 @@ const bleReadConfig = async () => {
         //console.log("Current device:",device)
         const result = await client.read(device.deviceId, DEVICE_INFO_SRV, DEVICE_CONFIG_RD);
         console.log("config length:",result.byteLength)
-        console.log('config value', result.getUint8(0));
-        return result.getUint8(0)
+        // we expect 4 bytes, starting with 0x55, 0xaa, folowed by personality code, followed by 0x00
+        let personality
+        if (result.byteLength == 4) {
+            if (result.getUint8(0) == 0x55 || result.getUint8(1) == 0xaa || result.getUint8(3) == 0x00) {   
+                personality = result.getUint8(2)
+                console.log("Device personality:",personality)
+                store.fn.setPersonality(personality)
+                return personality
+            }
+        } else {
+            console.log('config value', result.getUint8(0));
+            store.fn.setPersonality(0)
+            return 0
+        }
     } catch (e) {
         console.log("Error ",e.message)
         return null
@@ -301,11 +313,12 @@ const bleWritePair = async () => {
         console.log("pair1 returned:",r)
         const encryptedPair = await encryptChallenge(r,key)
         console.log("Encrypted pair:",encryptedPair,encryptedPair.length)
+        await new Promise(resolve => setTimeout(resolve, 100));
         await client.write(device.deviceId, AUTO_SRV, DEVICE_PAIR, encryptedPair);
         await new Promise(resolve => setTimeout(resolve, 100));
         store.fn.setDevkey(key)
         store.fn.setPaired(true)
-        console.log("Session key:",store.fn.devkey)
+        console.log("Session key after pair:",store.fn.devkey)
     } catch (e) {
         console.log("Error ",e.message)
         return null
@@ -325,11 +338,11 @@ const bleStartNotify = async () => {
               //emit("notify", value)
               //console.log('sensor value',value.getUint16(0,true) );
               //store.fn.setSensData([value.getUint16(0,true)])
-              console.log('notify len:',value.byteLength);
+              //console.log('notify len:',value.byteLength);
               // we can iterate over input data
               // console.log('sensor value',value.getInt16(0,true) );
               const decrypedData = await decryptWithIv(value.buffer)
-              console.log('decrypted value(s)',decrypedData);
+              //console.log('decrypted value(s)',decrypedData);
               // now we need the personality to analyze the buffer ...
               const sensData = new DataView(decrypedData).getInt16(0,true)
               // store.fn.setSensData([value.getInt16(0,true)])

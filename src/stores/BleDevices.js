@@ -12,6 +12,7 @@ export const useDeviceStore = defineStore('device', {
             devname: 'mpyctl',
             devkey: '',
             device: {},
+            personality: 0,
             sensData: [],
             configData: [],
             ctlData: []
@@ -36,6 +37,13 @@ export const useDeviceStore = defineStore('device', {
         },
         setPaired(paired) {
             this.paired = paired && this.connected
+        },
+        setPersonality(data) {
+            if (this.paired) {
+                this.personality = data
+            } else {
+                this.personality = 0
+            }
         },
         setDevice(device) {
             this.device = device

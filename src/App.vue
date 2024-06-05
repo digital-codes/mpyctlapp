@@ -3,8 +3,12 @@ import { onMounted, ref, watch } from "vue";
 import logo from "./assets/imgs/logo.png";
 
 import ExitCheck from "./components/ExitCheck.vue";
-import SimpleChart from "./components/SimpleChart.vue";
+import SimpleChart from "./components/charts/SimpleChart.vue";
+import ImuView from "./components/charts/ImuView.vue";
+
 //import RoverCtl from "./components/RoverCtl.vue";
+
+
 
 import { getMotionCtl } from "./services/motionCtl";
 
@@ -54,10 +58,26 @@ watch(
   () => deviceStore.sensData,
   async (newVal, oldVal) => {
     // console.log('sensor changed from', oldVal, 'to', newVal);
-    console.log('sensor changed from', oldVal[0], 'to', newVal[0]);
+    // console.log('sensor changed from', oldVal[0], 'to', newVal[0]);
     // You can add more actions here when devkey changes
-    await BleHandler.bleWriteDigital(bleTgl.value)
-    bleTgl.value = bleTgl.value ? 0 : 1
+    const personality = deviceStore.personality
+    switch (personality) {
+      case 1:
+        console.log("Personality 1")
+        break;
+      case 2:
+        if (bleTgl.value > 10) {
+          bleTgl.value = 0
+          await BleHandler.bleWriteDigital(1)
+          console.log("TGL Personality:", personality)
+        }
+        bleTgl.value += 1
+        break;
+      default:
+        console.log("Unknown personality")
+        await BleHandler.bleWriteDigital(bleTgl.value)
+        bleTgl.value = bleTgl.value ? 0 : 1
+    } 
   },
   { deep: true }
 )
@@ -119,7 +139,7 @@ onMounted(async () => {
     console.log("Ble init failed")
   }
   // preference database
-  // set key for mpyctl_0001
+  // set default key for mpyctl_0001
   const devId = "MpyCtl_0001"
   await dbSet(devId, "ee540e93c07e27db8da1648ed27214dd")
   const k = await dbKeys()
@@ -272,6 +292,11 @@ const viewCtl = (val) => {
             </VaListItem>
           </VaList>
         </div>
+
+        <ImuView>
+
+        </ImuView>
+
       </main>
       <main v-show="page === 2" class="p-4">
         <h3 class="va-h3">Rover Control</h3>
