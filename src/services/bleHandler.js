@@ -347,6 +347,7 @@ const bleStartNotify = async () => {
               const sensData = new DataView(decrypedData).getInt16(0,true)
               // store.fn.setSensData([value.getInt16(0,true)])
               store.fn.setSensData([sensData])
+              store.fn.setSensDataRaw(decrypedData)
             }
           );
         // const sensVal = value.getUint16(0, true)/100

@@ -14,6 +14,7 @@ export const useDeviceStore = defineStore('device', {
             device: {},
             personality: 0,
             sensData: [],
+            sensDataRaw: new ArrayBuffer(),
             configData: [],
             ctlData: []
         }
@@ -50,6 +51,9 @@ export const useDeviceStore = defineStore('device', {
         },
         setSensData(data) {
             this.sensData = data
+        },
+        setSensDataRaw(data) {
+            this.sensDataRaw = data
         },
         setConfigData(data) {
             this.configData = data

@@ -1,6 +1,12 @@
 <script setup>
-import { onMounted, onUnmounted, ref, nextTick } from 'vue';
+import { onMounted, onUnmounted, ref, nextTick, watch } from 'vue';
 import * as THREE from 'three';
+
+// pinia
+import { useDeviceStore } from "../../stores/BleDevices";
+const deviceStore = useDeviceStore()
+
+
 
 const imuContainer = ref(null);
 const imuDisplay = ref(null);
@@ -69,6 +75,37 @@ const startEmu = () => {
     }, 300);
 }
 
+watch(
+  () => deviceStore.sensDataRaw,
+  async (newVal, oldVal) => {
+    // console.log('sensor changed from', oldVal, 'to', newVal);
+    // console.log('sensor changed from', oldVal[0], 'to', newVal[0]);
+    // You can add more actions here when devkey changes
+    const view = new DataView(newVal);
+    // we have 5 short int and 2 chars
+    /*
+    for (let i = 0; i < 5; i++) {
+        const val = (view.getInt16(i * 2,true))/1000;
+        console.log(val);
+    }
+    for (let i = 10; i < 12; i++) {
+        const val = view.getInt8(i);
+        console.log(val);
+    }
+    */
+    imuData.value = {
+        x: (view.getInt16(2,true))/1000,
+        y: (view.getInt16(4,true))/1000,
+        z: (view.getInt16(6,true))/1000,
+        w: (view.getInt16(0,true))/1000
+    }
+    updateOrientation(imuData.value);
+  },
+  { deep: true }
+)
+
+
+
 const scene = new THREE.Scene();
 const camera = ref(null)
 //const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -116,16 +153,22 @@ onMounted(async () => {
 
     window.addEventListener('resize', handleResize);
 
-    // initial resize
     await nextTick();
     handleResize()
 
     // Simulate an orientation update
     updateOrientation(imuData.value);
     // start data emulation
-    startEmu()
+    //startEmu()
 
     animate();
+
+    // initial resize
+    await new Promise(resolve => setTimeout(resolve, 100));
+    await nextTick();
+    handleResize()
+
+
 });
 
 

@@ -1,11 +1,12 @@
 <script setup>
-import { onMounted, ref, watch } from "vue";
+import { onMounted, ref, shallowRef, watch } from "vue";
 import logo from "./assets/imgs/logo.png";
 
 import ExitCheck from "./components/ExitCheck.vue";
+/*
 import SimpleChart from "./components/charts/SimpleChart.vue";
 import ImuView from "./components/charts/ImuView.vue";
-
+*/
 //import RoverCtl from "./components/RoverCtl.vue";
 
 
@@ -36,10 +37,36 @@ import { defineAsyncComponent } from 'vue'
 const AsyncComp = defineAsyncComponent(() =>
   import('./components/MyComponent.vue')
 )
-*/
 const RoverCtl = defineAsyncComponent(() =>
   import('./components/personalities/RoverCar.vue') 
 )
+*/
+
+
+const currentPersonality = shallowRef('DefaultPersonality');
+
+const personalityComponents = [
+defineAsyncComponent(() => import('./components/charts/SimpleChart.vue')),
+defineAsyncComponent(() => import('./components/charts/SimpleChart.vue')),
+defineAsyncComponent(() => import('./components/personalities/ImuView.vue')),
+defineAsyncComponent(() => import('./components/personalities/RoverCar.vue'))
+]
+
+/*
+const personalities = [
+DefaultPersonality: defineAsyncComponent(() => import('./components/charts/SimpleChart.vue')),
+      RoverCtl: defineAsyncComponent(() => import('./components/personalities/RoverCar.vue')),
+      MxImu: defineAsyncComponent(() => import('./components/charts/ImuView.vue')),
+
+]
+      // Add more personalities as needed
+    };
+*/
+
+  // Function to change personality
+const changePersonality = async (personalityId) => {
+      currentPersonality.value = personalityComponents[personalityId];
+    }
 
 const deviceFiles = ref([]);
 
@@ -69,7 +96,7 @@ watch(
         if (bleTgl.value > 10) {
           bleTgl.value = 0
           await BleHandler.bleWriteDigital(1)
-          console.log("TGL Personality:", personality)
+          //console.log("TGL Personality:", personality)
         }
         bleTgl.value += 1
         break;
@@ -77,6 +104,7 @@ watch(
         console.log("Unknown personality")
         await BleHandler.bleWriteDigital(bleTgl.value)
         bleTgl.value = bleTgl.value ? 0 : 1
+        break;
     } 
   },
   { deep: true }
@@ -154,6 +182,7 @@ const getDevice = async () => {
     if (deviceStore.paired) {
       const cfg = await BleHandler.bleReadConfig()
       console.log("Config: ",cfg)
+      await changePersonality(cfg)
       await BleHandler.bleStartNotify()
       page.value = 2
     }
@@ -177,9 +206,11 @@ const closeApp = async () => {
 };
 CApp.addListener("backButton", closeApp);
 
+/*
 setInterval(() => {
   if (schart.value) schart.value.pushData(Math.random());
 }, 200);
+*/
 
 const goto = (pg) => {
   page.value = pg;
@@ -299,12 +330,19 @@ const viewCtl = (val) => {
 
       </main>
       <main v-show="page === 2" class="p-4">
-        <h3 class="va-h3">Rover Control</h3>
         <div v-if="deviceStore.paired">
+
+          <div class="personality">
+            <component :is="currentPersonality"></component>
+          </div>
+
+          <!-- 
           <RoverCtl @button-click="handleRoverButton" @slider-change="handleRoverSlider"
             @checkbox-change="handleRoverCheck">
           </RoverCtl>
           <SimpleChart ref="schart"></SimpleChart>
+
+          -->
         </div>
         <div v-else>
           <p>Device not paired</p>
@@ -358,5 +396,10 @@ const viewCtl = (val) => {
   display:unset;
 }
 
+.personality 
+{
+  display: block;
+  margin-top: 1rem;
+}
 
 </style>
