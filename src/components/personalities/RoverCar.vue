@@ -1,64 +1,146 @@
 <template>
   <div class="rover-ctl">
     <div class="bgrid">
-      <va-button
-        v-for="button in buttons"
-        :key="button.id"
-        @click="handleClick(button)"
-        :color="button.color"
-        :class="button.double?'double-width':''"
-      >
+      <va-button v-for="button in buttons" :key="button.id" @click="handleClick(button)" :color="button.color"
+        :class="button.double ? 'double-width' : ''">
         {{ button.label }}
       </va-button>
     </div>
     <div class="slgrid">
-      <va-slider
-        v-for="slider in sliders"
-        :key="slider.id"
-        v-model="slider.value"
-        :min="slider.min"
-        :max="slider.max"
-        @change="handleSliderChange(slider.id, slider.value)"
-        :label="slider.label"
-        track-label-visible
-        class="sld"
-      >
+      <va-slider v-for="slider in sliders" :key="slider.id" v-model="slider.value" :min="slider.min" :max="slider.max"
+        @change="handleSliderChange(slider.id, slider.value)" :label="slider.label" track-label-visible class="sld">
       </va-slider>
     </div>
     <div class="chgrid">
-      <va-checkbox
-        v-for="checkbox in checkboxes"
-        :key="checkbox.id"
-        v-model="checkbox.checked"
-        class="mb-6"
-        color="primary"
-        checked-icon="fa-check"
-        :label="checkbox.label"
-        @update:modelValue="handleCheckboxChange(checkbox.id, checkbox.checked)"
-      >
+      <va-checkbox v-for="checkbox in checkboxes" :key="checkbox.id" v-model="checkbox.checked" class="mb-6"
+        color="primary" checked-icon="fa-check" :label="checkbox.label"
+        @update:modelValue="handleCheckboxChange(checkbox.id, checkbox.checked)">
       </va-checkbox>
     </div>
 
     <VaDataTable :items="sensdata" />
 
-</div>
+  </div>
 </template>
 
 <script setup>
 import { ref } from "vue";
 import { onMounted } from "vue";
 
+import { getMotionCtl } from "../../services/motionCtl";
+// pinia
+import { useDeviceStore } from "../../stores/BleDevices";
+
+const deviceStore = useDeviceStore()
+
+
+// rover ctl is 7 bytes
+const roverCtl = ref([0, 0, 0, 0, 1, 0, 0])
+const roverSpeed = ref(0)
+const roverBtn = ref(10) // stop button
+const roverCheck = ref([0, 0])
+
 onMounted(() => {
   console.log("Mounted");
-  // buttons and checks are off by default. trnasmit default slider values only
+  // buttons and checks are off by default. transmit default slider values only
   for (const item of sliders.value) {
     const id = item.id;
-    const value = item.value;  
-    emit("slider-change", { id, value })
-  } 
+    const value = item.value;
+    roverSpeed.value = parseInt(item.value)
+  }
 })
 
-const emit = defineEmits(["button-click", "slider-change", "checkbox-change"]);
+/*
+# 2 pattern bits per motor
+# fwd: 10, rev: 01, 00,11:stop 
+patterns = OrderedDict([
+    ("fwd", 0b10101010),
+    ("rev", 0b01010101),
+    ("left", 0b01 10 10 01),
+    ("right", 0b10 01 01 10),
+    ("lfwd", 0b00 10 10 00),
+    ("rfwd", 0b10 00 00 10),
+    ("lrev", 0b01 00 00 01),
+    ("rrev", 0b00 01 01 00),
+    ("lturn", 0b10 01 10 01),
+    ("rturn", 0b01 10 01 10),
+    ("stop", 0b00 00 00 00)
+])
+*/
+
+
+const updateCar = () => {
+  console.log("Updating car")
+  console.log("Ctl data", roverCtl.value)
+  const nMots = 4
+  switch (roverBtn.value) {
+    case 1:
+      roverCtl.value[0] = - roverSpeed.value
+      roverCtl.value[1] = roverSpeed.value
+      roverCtl.value[2] = roverSpeed.value
+      roverCtl.value[3] = - roverSpeed.value
+      break
+    case 2:
+      for (let i = 0; i < nMots; i++)
+        roverCtl.value[i] = roverSpeed.value
+      break;
+    case 3:
+      for (let i = 0; i < nMots; i++)
+        roverCtl.value[i] = -roverSpeed.value
+      break
+    case 4:
+      roverCtl.value[0] = roverSpeed.value
+      roverCtl.value[1] = - roverSpeed.value
+      roverCtl.value[2] = - roverSpeed.value
+      roverCtl.value[3] = roverSpeed.value
+      break
+    case 5:
+      roverCtl.value[0] = 0
+      roverCtl.value[1] = roverSpeed.value
+      roverCtl.value[2] = roverSpeed.value
+      roverCtl.value[3] = 0
+      break
+    case 6:
+      roverCtl.value[0] = - roverSpeed.value
+      roverCtl.value[1] = 0
+      roverCtl.value[2] = 0
+      roverCtl.value[3] = - roverSpeed.value
+      break
+    case 7:
+      roverCtl.value[0] = 0
+      roverCtl.value[1] = - roverSpeed.value
+      roverCtl.value[2] = - roverSpeed.value
+      roverCtl.value[3] = 0
+      break
+    case 8:
+      roverCtl.value[0] = roverSpeed.value
+      roverCtl.value[1] = 0
+      roverCtl.value[2] = 0
+      roverCtl.value[3] = roverSpeed.value
+      break
+    case 9:
+      roverCtl.value[0] = roverSpeed.value
+      roverCtl.value[1] = - roverSpeed.value
+      roverCtl.value[2] = roverSpeed.value
+      roverCtl.value[3] = - roverSpeed.value
+      break
+    case 10:
+      for (let i = 0; i < nMots; i++)
+        roverCtl.value[i] = 0
+      break
+    case 11:
+      roverCtl.value[0] = - roverSpeed.value
+      roverCtl.value[1] = roverSpeed.value
+      roverCtl.value[2] = - roverSpeed.value
+      roverCtl.value[3] = roverSpeed.value
+      break
+    default:
+      for (let i = 0; i < nMots; i++)
+        roverCtl.value[i] = 0
+      break
+  }
+  deviceStore.setCtlData(roverCtl.value)
+}
 
 const buttons = ref([
   { id: 1, label: "Left", color: "primary" },
@@ -70,7 +152,7 @@ const buttons = ref([
   { id: 7, label: "REV Right", color: "primary" },
   { id: 8, label: "FWD Right", color: "primary" },
   { id: 9, label: "Rot Left", color: "primary" },
-  { id: 10, label: "Stop", color: "warning", double: true},
+  { id: 10, label: "Stop", color: "warning", double: true },
   { id: 11, label: "Rot Right", color: "primary" },
 ]);
 
@@ -85,26 +167,31 @@ const checkboxes = ref([
 ]);
 
 const sensdata = ref([
-  { label: "Temperature",value: 0 },
+  { label: "Temperature", value: 0 },
   { label: "Other", value: 10 }
 ])
 
 const handleClick = (button) => {
   // Handle button click logic here
   console.log(`Button ${button.id} clicked`);
-  emit("button-click", button.id);
+  roverBtn.value = parseInt(button.id)
+  updateCar()
 };
 
 const handleSliderChange = (id, value) => {
   // Handle slider change logic here
   console.log(`Slider ${id} changed to ${value}`);
-  emit("slider-change", { id, value });
+  roverSpeed.value = parseInt(value)
+  updateCar()
 };
 
 const handleCheckboxChange = (id, checked) => {
   // Handle checkbox change logic here
   console.log(`Checkbox ${id} changed to ${checked}`);
-  emit("checkbox-change", { id, checked });
+  const checkOffset = 5
+  roverCtl.value[checkOffset + parseInt(id) - 1] = checked ? 1 : 0
+  console.log("check:", roverCtl.value)
+  updateCar()
 };
 </script>
 
@@ -125,6 +212,7 @@ const handleCheckboxChange = (id, checked) => {
   grid-template-columns: repeat(4, 1fr);
   grid-gap: 10px;
 }
+
 .slgrid {
   /* sliders */
   margin-top: 2rem;
@@ -132,6 +220,7 @@ const handleCheckboxChange = (id, checked) => {
   grid-template-columns: repeat(2, 1fr);
   grid-gap: 10px;
 }
+
 .ckgrid {
   /* checkboxes */
   margin-top: 2rem;
@@ -141,7 +230,8 @@ const handleCheckboxChange = (id, checked) => {
 }
 
 .double-width {
-    grid-column: span 2; /* Makes the item span two columns */
+  grid-column: span 2;
+  /* Makes the item span two columns */
 }
 
 button {
@@ -156,7 +246,7 @@ button {
 .va-checkbox {
   text-align: left;
   grid-column: span 1;
-  margin:auto;
+  margin: auto;
   padding: 1rem 1rem 0 1rem
 }
 

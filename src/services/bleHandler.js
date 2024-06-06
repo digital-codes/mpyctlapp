@@ -311,6 +311,11 @@ const bleWritePair = async () => {
         console.log("Key:",key)
         const r = await bleReadPair()
         console.log("pair1 returned:",r)
+        // r is UInt8Array
+        /*
+        pair1 returned: 
+        Uint8Array(4) [144, 62, 2, 191, buffer: ArrayBuffer(4), byteLength: 4, byteOffset: 0, length: 4, Symbol(Symbol.toStringTag): 'Uint8Array']
+        */
         const encryptedPair = await encryptChallenge(r,key)
         console.log("Encrypted pair:",encryptedPair,encryptedPair.length)
         await new Promise(resolve => setTimeout(resolve, 100));
@@ -386,9 +391,12 @@ const bleWriteDigital = async (data) => {
         if (!store.fn.connected) throw new Error("No device connected")
         const device = store.fn.device
         //console.log("Current device:",device)
-        let cmd = new Uint8Array([data,1,2,3,4,5]);
+        // let cmd = new Uint8Array([data,1,2,3,4,5]);
+        let cmd = new Uint8Array(data);
+        // console.log("Writing:",cmd)
         //await client.write(device.deviceId, AUTO_SRV, AUTO_WR, cmd);
         const encryptedCmd = await encryptChallenge(cmd,store.fn.devkey)
+        // console.log("Encrypted:",encryptedCmd)
         await client.write(device.deviceId, AUTO_SRV, AUTO_WR, encryptedCmd);
         //console.log('data written');
     } catch (e) {

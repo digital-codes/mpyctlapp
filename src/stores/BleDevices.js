@@ -59,7 +59,11 @@ export const useDeviceStore = defineStore('device', {
             this.configData = data
         },
         setCtlData(data) {
-            this.ctlData = data
+            if (this.paired) {
+                console.log("Writing ctl",data)
+                this.ctlData = data
+                console.log("ctl ...",this.ctlData)
+            }
         }
     }
 })  // This is the store that will be used in the app

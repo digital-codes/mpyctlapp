@@ -3,14 +3,7 @@ import { onMounted, ref, shallowRef, watch } from "vue";
 import logo from "./assets/imgs/logo.png";
 
 import ExitCheck from "./components/ExitCheck.vue";
-/*
-import SimpleChart from "./components/charts/SimpleChart.vue";
-import ImuView from "./components/charts/ImuView.vue";
-*/
-//import RoverCtl from "./components/RoverCtl.vue";
 import EmptyView from "./components/personalities/EmptyView.vue";
-
-// import ImuBView from "./components/personalities/ImuBView.vue";
 
 import { getMotionCtl } from "./services/motionCtl";
 
@@ -94,22 +87,37 @@ watch(
         console.log("Personality 1")
         break;
       case 2:
+        // IMU demo
         if (bleTgl.value > 10) {
           bleTgl.value = 0
-          await BleHandler.bleWriteDigital(1)
+          await BleHandler.bleWriteDigital([1])
           //console.log("TGL Personality:", personality)
         }
         bleTgl.value += 1
         break;
+      case 3:
+        // Rover Car
+          console.log("Rover Car:", personality)
+          break
       default:
         console.log("Unknown personality")
-        await BleHandler.bleWriteDigital(bleTgl.value)
+        await BleHandler.bleWriteDigital([bleTgl.value])
         bleTgl.value = bleTgl.value ? 0 : 1
         break;
     } 
   },
   { deep: true }
 )
+
+watch(
+  () => deviceStore.ctlData,
+  async (newVal, oldVal) => {
+    console.log('ctl changed from', oldVal, 'to', newVal);
+    await BleHandler.bleWriteDigital(newVal)
+  },
+  { deep: true }
+)
+
 
 watch(
   () => deviceFiles.value,
@@ -216,29 +224,6 @@ const menuToggle = () => {
   showSidebar.value = !showSidebar.value;
 };
 
-const handleRoverButton = (payload) => {
-  // Handle the emitted event from RoverCtl component
-  console.log("Button emit from RoverCtl:", payload);
-  // Perform any necessary actions based on the emitted data
-  const ctl = getMotionCtl(123);
-  viewCtl(ctl);
-};
-const handleRoverSlider = (payload) => {
-  // Handle the emitted event from RoverCtl component
-  console.log("Slider emit from RoverCtl:", payload);
-  // Perform any necessary actions based on the emitted data
-  const ctl = getMotionCtl(123);
-  viewCtl(ctl);
-};
-const handleRoverCheck = (payload) => {
-  // Handle the emitted event from RoverCtl component
-  console.log("Checkbox emit from RoverCtl:", payload);
-  // Perform any necessary actions based on the emitted data
-  const ctl = getMotionCtl(123);
-  viewCtl(ctl);
-};
-
-//
 
 const viewCtl = (val) => {
   const view = new DataView(val);
@@ -331,13 +316,6 @@ const viewCtl = (val) => {
             <component :is="currentPersonality"></component>
           </div>
 
-          <!-- 
-          <RoverCtl @button-click="handleRoverButton" @slider-change="handleRoverSlider"
-            @checkbox-change="handleRoverCheck">
-          </RoverCtl>
-          <SimpleChart ref="schart"></SimpleChart>
-
-          -->
         </div>
         <div v-else>
           <p>Device not paired</p>
