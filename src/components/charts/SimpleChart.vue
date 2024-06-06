@@ -4,7 +4,7 @@
   
 <script setup lang="js">
 
-import { ref } from "vue"
+import { onMounted, onUnmounted, ref } from "vue"
 import { VueEcharts } from 'vue3-echarts';
 
 const simpleChart = ref()
@@ -87,19 +87,40 @@ const pushData = async (dt) => {
     await simpleChart.value.setOption(options.value)
 }
 
-defineExpose({
-    pushData
+const t = ref(null)
+
+onMounted(() => {
+    if (simpleChart.value) {
+        console.log("SimpleChart mounted")
+        t.value = setInterval(() => {
+        if (simpleChart.value) pushData(Math.random());
+        }, 200);
+    } else {
+        console.log("SimpleChart not mounted")
+    }
 })
 
+onUnmounted(() => {
+    if (t.value !== null) {
+        clearInterval(t.value)
+        t.value = null
+    }
+})
 
 </script>
 
 <style scoped>
 .chart {
     /*height:400px;*/
+    /*
     height: 300px;
     max-width: 80%;
+    */
+    height:100%;
+    width:100%;
+    min-height: 250px;
     margin-left: auto;
     margin-right: auto;
 }
+
 </style>

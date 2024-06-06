@@ -8,8 +8,7 @@ import SimpleChart from "./components/charts/SimpleChart.vue";
 import ImuView from "./components/charts/ImuView.vue";
 */
 //import RoverCtl from "./components/RoverCtl.vue";
-
-
+import EmptyView from "./components/personalities/EmptyView.vue";
 
 import { getMotionCtl } from "./services/motionCtl";
 
@@ -165,6 +164,7 @@ onMounted(async () => {
     console.log("Ble init ok")
   } else {
     console.log("Ble init failed")
+    await changePersonality(0)
   }
   // preference database
   // set default key for mpyctl_0001
@@ -200,17 +200,10 @@ const closeApp = async () => {
   logDeviceInfo();
   if (await exitCheck.value.show()) {
     CApp.exitApp();
-  } else {
-    schart.value.pushData(Math.random());
   }
 };
 CApp.addListener("backButton", closeApp);
 
-/*
-setInterval(() => {
-  if (schart.value) schart.value.pushData(Math.random());
-}, 200);
-*/
 
 const goto = (pg) => {
   page.value = pg;
@@ -346,6 +339,7 @@ const viewCtl = (val) => {
         </div>
         <div v-else>
           <p>Device not paired</p>
+          <EmptyView></EmptyView>
         </div>
       </main>
     </template>
