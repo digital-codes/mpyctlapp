@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, onUnmounted, ref, nextTick, watch } from 'vue';
-import * as THREE from 'three';
+
+import * as BABYLON from '@babylonjs/core';
 
 // pinia
 import { useDeviceStore } from "../../stores/BleDevices";
@@ -33,6 +34,7 @@ function calculateOrientation(ax, ay, az) {
     return { roll, pitch };
 }
 
+/*
 // Function to convert roll and pitch to quaternion
 function eulerToQuaternion(roll, pitch) {
     const cy = Math.cos(0 / 2);  // cos(yaw / 2) = cos(0 / 2) because yaw = 0
@@ -49,30 +51,30 @@ function eulerToQuaternion(roll, pitch) {
 
     return { w, x, y, z };
 }
+*/
 
-
+// Function to create quaternion from Euler angles
+const eulerToQuaternion = (x, y, z) => {
+    return BABYLON.Quaternion.RotationYawPitchRoll(BABYLON.Angle.FromDegrees(y).radians(), BABYLON.Angle.FromDegrees(x).radians(), BABYLON.Angle.FromDegrees(z).radians());
+};
 
 
 const updateOrientation = (quaternion) => {
-    cube.quaternion.set(quaternion.x, quaternion.y, quaternion.z, quaternion.w);
+    const q = new BABYLON.Quaternion(quaternion.x, quaternion.y, quaternion.z, quaternion.w);
+    box.value.rotationQuaternion = q
 }
 
+const t = ref(null)
 
 const startEmu = () => {
     console.log("emu started")
-    setInterval(() => {
-        /*
-        imuData.value.x += 0.01;
-        imuData.value.y += 0.01;
-        imuData.value.z += 0.01;
-        */
-        const { roll, pitch} = calculateOrientation(imuAcc.value.x, imuAcc.value.y, imuAcc.value.z);
-        imuData.value = eulerToQuaternion(roll, pitch);
-        imuAcc.value.x = Math.random() * 2 - 1;
-        imuAcc.value.y = Math.random() * 2 - 1;;
-        imuAcc.value.z = Math.random() * 2 - 1;;
+    t.value = setInterval(() => {
+        imuData.value = eulerToQuaternion(imuAcc.value.x, imuAcc.value.y, imuAcc.value.z);
+        imuAcc.value.x = (Math.random() * 2 - 1)*180;
+        imuAcc.value.y = (Math.random() * 2 - 1)*180;
+        imuAcc.value.z = (Math.random() * 2 - 1)*180;
         updateOrientation(imuData.value);
-    }, 300);
+    }, 1000);
 }
 
 watch(
@@ -105,27 +107,8 @@ watch(
 )
 
 
-
-const scene = new THREE.Scene();
-const camera = ref(null)
-//const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-
-const renderer = new THREE.WebGLRenderer();
-// renderer.setSize(window.innerWidth, window.innerHeight);
-//imuDisplay.value.appendChild(renderer.domElement);
-
-const geometry = new THREE.BoxGeometry();
-const material = new THREE.MeshBasicMaterial({ color: 0x00ff00, wireframe: true });
-const cube = new THREE.Mesh(geometry, material);
-scene.add(cube);
-
-function animate() {
-    requestAnimationFrame(animate);
-    renderer.render(scene, camera.value);
-}
-
-
 const handleResize = () => {
+    return
     const width = imuContainer.value.clientWidth;
     const height = imuContainer.value.clientHeight;
     console.log("resize:", width, height);
@@ -134,22 +117,25 @@ const handleResize = () => {
         camera.value = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
         camera.value.position.z = 5;
     };
-    renderer.setSize(width, height);
+    //renderer.setSize(width, height);
     camera.value.aspect = width / height;
-    camera.value.updateProjectionMatrix();
+    //camera.value.updateProjectionMatrix();
 };
-
-
-// Cleanup on component unmount
-onUnmounted(() => {
-    window.removeEventListener('resize', handleResize);
-});
 
 
 
 onMounted(async () => {
     imuContainer.value = imuDisplay.value.parentElement;
-    imuDisplay.value.appendChild(renderer.domElement);
+
+    engine.value = new BABYLON.Engine(imuDisplay.value, true);
+
+    scene.value = createScene();
+    console.log("scene created",scene.value)
+
+    engine.value.runRenderLoop(() => {
+    scene.value.render();
+    });
+
 
     window.addEventListener('resize', handleResize);
 
@@ -161,8 +147,6 @@ onMounted(async () => {
     // start data emulation
     //startEmu()
 
-    animate();
-
     // initial resize
     await new Promise(resolve => setTimeout(resolve, 100));
     await nextTick();
@@ -171,13 +155,74 @@ onMounted(async () => {
 
 });
 
+onUnmounted(() => {
+  if (engine.value) {
+    engine.value.dispose();
+  }
+  window.removeEventListener('resize', handleResize);
+  if (t.value) {
+    clearInterval(t.value);
+    t.value = null
+  }
+});
+
+// ----------
+
+
+const engine = ref(null)
+const scene = ref(null)
+const camera = ref(null)
+const light = ref(null)
+const box = ref(null)
+
+const createScene = () => {
+    const scn = new BABYLON.Scene(engine.value);
+    scn.clearColor = BABYLON.Color3.White();
+
+    camera.value = new BABYLON.ArcRotateCamera("camera", 
+        Math.PI / 2, Math.PI / 2, 5, 
+        new BABYLON.Vector3(0, 0, 5), scene.value);
+    camera.value.attachControl(imuDisplay.value, true);
+
+    light.value = new BABYLON.HemisphericLight("light", new BABYLON.Vector3(1, 1, 0), scn);
+
+
+    box.value = BABYLON.MeshBuilder.CreateBox("box", { size: 2 }, scn);
+    box.value.position.z = 5;
+
+    const boxMaterial = new BABYLON.StandardMaterial("boxMat", scn);
+    boxMaterial.diffuseColor = new BABYLON.Color3(0.6, 0.5, 0.4);  // Grey color
+    boxMaterial.specularColor = new BABYLON.Color3(0.2, 0.2, 0.2);  // Low specular intensity
+
+    box.value.material = boxMaterial;  // or pbrMaterial for PBR
+
+    const light2 = new BABYLON.DirectionalLight("dirLight", new BABYLON.Vector3(-1, -2, -1), scn);
+    light2.position = new BABYLON.Vector3(20, 40, 20);
+
+    const shadowGenerator = new BABYLON.ShadowGenerator(1024, light2);
+    shadowGenerator.useBlurExponentialShadowMap = true;  // Use blur exponential shadow map for softer shadows
+    shadowGenerator.blurKernel = 64;  // Adjust the blur level to soften the shadows
+
+    // Add the box to the list of shadow casters
+    shadowGenerator.addShadowCaster(box.value);
+
+    // Enable shadows for the ground or any other receiving surfaces
+    const ground = BABYLON.MeshBuilder.CreateGround("ground", {width: 50, height: 50}, scn);
+    ground.position.y = -2; // Slightly below zero to avoid z-fighting with the box placed at y = 0
+    ground.receiveShadows = true;
+
+
+    return scn
+};
+
 
 </script>
 
+
 <template>
     <div class="container">
-        <h1>IMU View</h1>
-        <div ref="imuDisplay" class="imu"></div>
+        <h1>IMU B View</h1>
+        <canvas ref="imuDisplay" class="imu"></canvas>
     </div>
 </template>
 
@@ -196,6 +241,7 @@ onMounted(async () => {
     width: 100%;
     height: 100%;
     background-color: #e0e0e0;
+    touch-action: none; /* Disable touch panning and pinch-zooming */
     /* Light grey background */
 }
 </style>

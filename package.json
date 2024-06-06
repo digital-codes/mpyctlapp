@@ -17,6 +17,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@babylonjs/core": "^7.10.0",
     "@capacitor-community/bluetooth-le": "^6.0.0",
     "@capacitor/android": "^6.0.0",
     "@capacitor/app": "^6.0.0",
@@ -31,7 +32,6 @@
     "@fortawesome/vue-fontawesome": "^3.0.6",
     "echarts": "^5.5.0",
     "pinia": "^2.1.7",
-    "three": "^0.165.0",
     "vue": "^3.4.27",
     "vue3-echarts": "^1.1.0",
     "vuestic-ui": "^1.9.10"

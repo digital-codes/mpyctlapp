@@ -10,6 +10,8 @@ import ImuView from "./components/charts/ImuView.vue";
 //import RoverCtl from "./components/RoverCtl.vue";
 import EmptyView from "./components/personalities/EmptyView.vue";
 
+// import ImuBView from "./components/personalities/ImuBView.vue";
+
 import { getMotionCtl } from "./services/motionCtl";
 
 import { App as CApp } from "@capacitor/app";
@@ -47,7 +49,7 @@ const currentPersonality = shallowRef('DefaultPersonality');
 const personalityComponents = [
 defineAsyncComponent(() => import('./components/charts/SimpleChart.vue')),
 defineAsyncComponent(() => import('./components/charts/SimpleChart.vue')),
-defineAsyncComponent(() => import('./components/personalities/ImuView.vue')),
+defineAsyncComponent(() => import('./components/personalities/ImuBView.vue')),
 defineAsyncComponent(() => import('./components/personalities/RoverCar.vue'))
 ]
 
@@ -317,9 +319,9 @@ const viewCtl = (val) => {
           </VaList>
         </div>
 
-        <ImuView>
-
-        </ImuView>
+        <!-- 
+        <ImuBView></ImuBView>
+        -->
 
       </main>
       <main v-show="page === 2" class="p-4">
