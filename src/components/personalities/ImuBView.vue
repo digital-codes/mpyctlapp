@@ -230,12 +230,20 @@ const createScene = () => {
 <style scoped>
 .container {
     display: block;
-    width: 400px;
-    height: 300px;
+    width: 800px;
+    height: 600px;
     margin-left:auto;
     margin-right:auto;
     background-color: yellow;
 }
+
+@media (max-width: 800px) {
+    .container {
+    width: 400px;
+    height: 300px;
+}
+}
+
 
 .imu {
     width: 100%;
