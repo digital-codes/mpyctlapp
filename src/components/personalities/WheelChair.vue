@@ -50,43 +50,50 @@ onMounted(() => {
 watch(
   () => deviceStore.sensDataRaw,
   async (newVal, oldVal) => {
-    console.log('wheel status changed from', oldVal, 'to', newVal);
+    //console.log('wheel status changed from', oldVal, 'to', newVal);
     const view = new DataView(newVal);
+    // expect 3 values, status(byte), turn(byte), speed(uint16)
     const status = view.getUint8(0, true)
-    console.log("status", status)
-    switch (status % 3) {
+    const turn = view.getUint8(1, true)
+    //console.log("turn", turn)
+    const speed = view.getUint16(2, true)
+    //console.log("status", status)
+    switch (status) {
       case 0:
         items.value[0].color = "#00ff00"
         //items.value[0].label = "OK"
         items.value[0].icon = "fa-check"
-
         break;
-        case 1:
-        items.value[0].color = "#ff0000"
-        //items.value[0].label = "Error"
-        items.value[0].icon = "fa-bomb" // xmark
-        
+      case 1:
+        items.value[0].color = "#ffff00"
+        //items.value[0].label = "???"
+        items.value[0].icon = "fa-battery-empty"
         break;
       case 2:
         items.value[0].color = "#0000ff"
         //items.value[0].label = "???"
         items.value[0].icon = "fa-triangle-exclamation"
         break;
+      case 3:
+        items.value[0].color = "#ff0000"
+        //items.value[0].label = "Error"
+        items.value[0].icon = "fa-bomb" // xmark
+        break;
     }
-    const speed = view.getUint8(1, true)
     items.value[1].label = String(speed)
   },
   { deep: true }
 )
 
-
+const ctlIdx = ref(0)
 
 const updateDevice = (starting = false) => {
-  console.log("Updating device")
+  console.log("Updating device", starting)
   deviceCtl.value[0] = starting ? 1 : 0   // starting
   deviceCtl.value[1] = items.value[3].value // speed
   deviceCtl.value[2] = items.value[6].value // turn
   deviceCtl.value[3] = items.value[5].value ? 1 : 0 // direction
+  deviceCtl.value[4] = ++ctlIdx.value // ref cnt
   deviceStore.setCtlData(deviceCtl.value)
 }
 
@@ -126,9 +133,9 @@ const handleClick = (item) => {
       // direction
       items.value[item.id - 1].value = !items.value[item.id - 1].value
       items.value[item.id - 1].icon = items.value[item.id - 1].value ? "fa-up-long" : "fa-down-long"
+      updateDevice()
       break;
   }
-  updateDevice()
 };
 
 const handleSliderChange = (item) => {
