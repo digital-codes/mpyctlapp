@@ -40,10 +40,11 @@ const RoverCtl = defineAsyncComponent(() =>
 const currentPersonality = shallowRef('DefaultPersonality');
 
 const personalityComponents = [
-defineAsyncComponent(() => import('./components/charts/SimpleChart.vue')),
-defineAsyncComponent(() => import('./components/charts/SimpleChart.vue')),
-defineAsyncComponent(() => import('./components/personalities/ImuBView.vue')),
-defineAsyncComponent(() => import('./components/personalities/RoverCar.vue'))
+  defineAsyncComponent(() => import('./components/charts/SimpleChart.vue')),
+  defineAsyncComponent(() => import('./components/charts/SimpleChart.vue')),
+  defineAsyncComponent(() => import('./components/personalities/ImuBView.vue')),
+  defineAsyncComponent(() => import('./components/personalities/RoverCar.vue')),
+  defineAsyncComponent(() => import('./components/personalities/WheelChair.vue'))
 ]
 
 /*
@@ -57,10 +58,10 @@ DefaultPersonality: defineAsyncComponent(() => import('./components/charts/Simpl
     };
 */
 
-  // Function to change personality
+// Function to change personality
 const changePersonality = async (personalityId) => {
-      currentPersonality.value = personalityComponents[personalityId];
-    }
+  currentPersonality.value = personalityComponents[personalityId];
+}
 
 const deviceFiles = ref([]);
 
@@ -97,14 +98,18 @@ watch(
         break;
       case 3:
         // Rover Car
-          console.log("Rover Car:", personality)
-          break
+        console.log("Rover Car:", personality)
+        break
+      case 4:
+        // Wheel chair
+        console.log("Wheel Chair:", personality)
+        break
       default:
         console.log("Unknown personality")
         await BleHandler.bleWriteDigital([bleTgl.value])
         bleTgl.value = bleTgl.value ? 0 : 1
         break;
-    } 
+    }
   },
   { deep: true }
 )
@@ -154,13 +159,15 @@ watch(
         deviceFiles.value = [] // close field
       };
       // Read the file as text
-      await reader.readAsText(file);
+      reader.readAsText(file);
     } catch (error) {
       console.log("Error:", error)
     }
   }
 )
 
+
+const fallbackPersonality = 4 // normally 0. change for testing new personalities
 
 onMounted(async () => {
   console.log("App mounted");
@@ -174,7 +181,7 @@ onMounted(async () => {
     console.log("Ble init ok")
   } else {
     console.log("Ble init failed")
-    await changePersonality(0)
+    await changePersonality(fallbackPersonality)
   }
   // preference database
   // set default key for mpyctl_0001
@@ -191,7 +198,7 @@ const getDevice = async () => {
     await BleHandler.bleWritePair()
     if (deviceStore.paired) {
       const cfg = await BleHandler.bleReadConfig()
-      console.log("Config: ",cfg)
+      console.log("Config: ", cfg)
       await changePersonality(cfg)
       await BleHandler.bleStartNotify()
       page.value = 2
@@ -296,7 +303,7 @@ const viewCtl = (val) => {
         </div>
         <div class="devlist">
           <VaList>
-            <VaListItem v-for="(item,idx) in knownDevices" :key="idx">
+            <VaListItem v-for="(item, idx) in knownDevices" :key="idx">
               <VaListItemSection>
                 <VaListItemLabel>{{ item }}</VaListItemLabel>
               </VaListItemSection>
@@ -354,7 +361,6 @@ const viewCtl = (val) => {
 .va-input {
   --va-input-font-size: 1.5rem;
 }
-
 </style>
 
 <style>
@@ -366,14 +372,12 @@ const viewCtl = (val) => {
   font-size: 1rem;
 }
 
-.upload > .va-file-upload > .va-file-upload__field {
-  display:unset;
+.upload>.va-file-upload>.va-file-upload__field {
+  display: unset;
 }
 
-.personality 
-{
+.personality {
   display: block;
   margin-top: 1rem;
 }
-
 </style>

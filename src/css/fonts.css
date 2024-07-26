@@ -1,4 +1,4 @@
-
+/*
 @font-face {
     font-family: "Dekko";
     src: url("/fonts/Dekko-Regular.woff2") format("woff2"),
@@ -6,6 +6,7 @@
     url("/fonts/Dekko-Regular.ttf") format("truetype")
     ;
   }
+*/
 
 /* vuestic override */
 :root {

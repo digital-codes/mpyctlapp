@@ -13,6 +13,9 @@ import '@fortawesome/fontawesome-free/css/all.min.css'
 // remove material icons
 //import "material-design-icons-iconfont/dist/material-design-icons.min.css";
 
+// fonts from npm
+import "@fontsource/dekko/latin.css"; 
+
 // override 
 import "./css/style.css"
 import "./css/fonts.css"
