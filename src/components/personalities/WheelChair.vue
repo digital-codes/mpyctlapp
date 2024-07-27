@@ -10,6 +10,13 @@
         </span>
       </component>
     </div>
+    <va-switch
+      v-model="voltage"
+      true-inner-label="24V"
+      false-inner-label="12V"
+      :disabled="voltageActive"          
+    >
+    </va-switch>
 
   </div>
 </template>
@@ -19,6 +26,10 @@ import { ref, watch, onMounted } from "vue";
 
 // pinia
 import { useDeviceStore } from "../../stores/BleDevices";
+
+const voltage = ref(false)
+const voltageActive = ref(true)
+
 
 const deviceStore = useDeviceStore()
 
@@ -72,7 +83,7 @@ watch(
       case 2:
         items.value[0].color = "#0000ff"
         //items.value[0].label = "???"
-        items.value[0].icon = "fa-triangle-exclamation"
+        items.value[0].icon = "fa-gauge" // "fa-triangle-exclamation"
         break;
       case 3:
         items.value[0].color = "#ff0000"
@@ -90,12 +101,14 @@ const ctlIdx = ref(0)
 const updateDevice = (status = 0) => {
   console.log("Updating device", status)
   // deviceCtl is 5 bytes, last one only to inidcate change for pinia update
-  // 0: starting, 1: speed, 2: turn, 3: direction
+  // 0: starting, 1: speed, 2: turn, 3: direction, 4: voltage. 5: ref cnt only for pinia
   deviceCtl.value[0] = status   // normal, starting, stopping
   deviceCtl.value[1] = items.value[3].value // speed
   deviceCtl.value[2] = items.value[6].value // turn
   deviceCtl.value[3] = items.value[5].value ? 1 : 0 // direction
-  deviceCtl.value[4] = ++ctlIdx.value // ref cnt
+  deviceCtl.value[4] = voltage.value ? 1 : 0 // 12V or 24V
+  deviceCtl.value[5] = ++ctlIdx.value // ref cnt
+
   deviceStore.setCtlData(deviceCtl.value)
 }
 
@@ -104,6 +117,7 @@ const stop = () => {
   items.value[6].value = 5
   items.value[2].disabled = false
   items.value[3].disabled = true
+  voltageActive.value = false
   updateDevice(2)
 }
 
@@ -112,6 +126,7 @@ const start = () => {
   items.value[6].value = 5
   items.value[2].disabled = true
   items.value[3].disabled = false
+  voltageActive.value = true
   updateDevice(1)
 }
 
