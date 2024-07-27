@@ -87,9 +87,11 @@ watch(
 
 const ctlIdx = ref(0)
 
-const updateDevice = (starting = false) => {
-  console.log("Updating device", starting)
-  deviceCtl.value[0] = starting ? 1 : 0   // starting
+const updateDevice = (status = 0) => {
+  console.log("Updating device", status)
+  // deviceCtl is 5 bytes, last one only to inidcate change for pinia update
+  // 0: starting, 1: speed, 2: turn, 3: direction
+  deviceCtl.value[0] = status   // normal, starting, stopping
   deviceCtl.value[1] = items.value[3].value // speed
   deviceCtl.value[2] = items.value[6].value // turn
   deviceCtl.value[3] = items.value[5].value ? 1 : 0 // direction
@@ -102,7 +104,7 @@ const stop = () => {
   items.value[6].value = 5
   items.value[2].disabled = false
   items.value[3].disabled = true
-  updateDevice(false)
+  updateDevice(2)
 }
 
 const start = () => {
@@ -110,7 +112,7 @@ const start = () => {
   items.value[6].value = 5
   items.value[2].disabled = true
   items.value[3].disabled = false
-  updateDevice(true)
+  updateDevice(1)
 }
 
 const handleClick = (item) => {

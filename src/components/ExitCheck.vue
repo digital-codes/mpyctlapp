@@ -13,7 +13,7 @@ const show = async () => {
         okText: "Yes",
         cancelText: "No",
         noDismiss: true,
-        hideDefaultActions: true,
+        hideDefaultActions: false, // no buttons visible when true,
         closeButton: false,
     })
     return exit
