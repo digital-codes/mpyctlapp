@@ -216,6 +216,7 @@ const closeApp = async () => {
   console.log("Closing app");
   logDeviceInfo();
   if (await exitCheck.value.show()) {
+    await dropDevice()  
     CApp.exitApp();
   }
 };
