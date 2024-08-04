@@ -8,7 +8,7 @@ const motionHandler = { handler: null,
     filterAlpha: [],
     filterBeta: [],
     filterGamma: [],
-    drops: null,
+    drops: 0,
     dropCnt: 0,
  }
 
@@ -47,8 +47,14 @@ const permitMotion = async () => {
             acc.x, acc.y, acc.z,
             rot.alpha, rot.beta, rot.gamma,
             interval, ts);
-        if (motionHandler.drops == null) {
-            motionHandler.drops = Math.floor(100/interval) // drop event
+        if (motionHandler.drops == 0) {
+            // bluefy on ios has interval in s, not ms
+            if (interval > 1) {
+                motionHandler.drops = Math.floor(100/interval) + 1 // drop event
+            } else {
+                motionHandler.drops = Math.floor(100/(1000*interval)) + 1 // drop event
+            }
+            document.getElementById("motion").innerText = `Intervall: ${interval}`
             motionHandler.dropCnt = 0;
         } else {
             motionHandler.filterX.push(acc.x)
