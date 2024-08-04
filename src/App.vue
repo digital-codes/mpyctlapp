@@ -18,6 +18,9 @@ const deviceStore = useDeviceStore()
 
 import * as BleHandler from "./services/bleHandler"
 
+import { permitMotion, removeMotion, } from './services/deviceMotion'
+
+
 const logDeviceInfo = async () => {
   const info = await Device.getInfo();
   console.log(info);
@@ -169,6 +172,8 @@ watch(
 
 const fallbackPersonality = 4 // normally 0. change for testing new personalities
 
+const motionBtn = ref(null)
+
 onMounted(async () => {
   console.log("App mounted");
   logDeviceInfo();
@@ -190,6 +195,7 @@ onMounted(async () => {
   const k = await dbKeys()
   console.log("Keys:", k)
   console.log(await dbCheck(devId))
+
 });
 
 const getDevice = async () => {
@@ -311,6 +317,10 @@ const viewCtl = (val) => {
             </VaListItem>
           </VaList>
         </div>
+
+        <va-button  @click="permitMotion">Start Motion</va-button>
+        <va-button @click="removeMotion">Stop Motion</va-button>
+        <p id="motion"></p>
 
         <!-- 
         <ImuBView></ImuBView>
