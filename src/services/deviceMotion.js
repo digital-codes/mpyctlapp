@@ -1,7 +1,8 @@
 import { Motion } from '@capacitor/motion';
 
 
-const motionHandler = { handler: null,
+const motionHandler = {
+    handler: null,
     filterX: [],
     filterY: [],
     filterZ: [],
@@ -10,12 +11,13 @@ const motionHandler = { handler: null,
     filterGamma: [],
     drops: 0,
     dropCnt: 0,
- }
+}
 
 const permitMotion = async () => {
     console.log("Mot perm")
     if (!Motion) {
-        console.log("Motion not available")
+        //console.log("Motion not available")
+        document.getElementById("motion").innerText = `Motion not available`
         return;
     }
     if (motionHandler.handler != null) {
@@ -23,10 +25,11 @@ const permitMotion = async () => {
         return;
     }
     // check if we can ask for permission
+    // android chrome might block sensor access => enable in settings
     if (typeof DeviceOrientationEvent.requestPermission === "function")
         try {
             await DeviceMotionEvent.requestPermission();
-            console.log("Motion permission granted")
+            //console.log("Motion permission granted")
             document.getElementById("motion").innerText = "Granted"
         } catch (e) {
             console.log("Error", e)
@@ -35,6 +38,17 @@ const permitMotion = async () => {
             document.getElementById("motion").innerText = `Permission error`
             return;
         }
+
+    // reset handler
+    motionHandler.drops = 0;
+    motionHandler.dropCnt = 0;
+    motionHandler.filterX = [];
+    motionHandler.filterY = [];
+    motionHandler.filterZ = [];
+    motionHandler.filterAlpha = [];
+    motionHandler.filterBeta = [];
+    motionHandler.filterGamma = [];
+
     // Once the user approves, can start listening:
     document.getElementById("motion").innerText = "Starting motion"
 
@@ -50,9 +64,9 @@ const permitMotion = async () => {
         if (motionHandler.drops == 0) {
             // bluefy on ios has interval in s, not ms
             if (interval > 1) {
-                motionHandler.drops = Math.floor(100/interval) + 1 // drop event
+                motionHandler.drops = Math.floor(100 / interval) + 1 // drop event
             } else {
-                motionHandler.drops = Math.floor(100/(1000*interval)) + 1 // drop event
+                motionHandler.drops = Math.floor(100 / (1000 * interval)) + 1 // drop event
             }
             document.getElementById("motion").innerText = `Intervall: ${interval}`
             motionHandler.dropCnt = 0;
@@ -95,24 +109,14 @@ const permitMotion = async () => {
 }
 
 // Stop the acceleration listener
-const stopAcceleration = () => {
+const disableMotion = () => {
     if (motionHandler.handler != null) {
-        console.log("Stop Motion")
+        //console.log("Stop Motion")
         motionHandler.handler.remove();
-    }
-};
-
-
-// Remove all listeners
-const removeMotion = () => {
-    console.log("Remove Motion")
-    if (motionHandler.handler != null) {
-        stopAcceleration();
-        Motion.removeAllListeners();
         motionHandler.handler = null;
         document.getElementById("motion").innerText = "No Motion"
     } else {
-        console.log("Motion not started")
+        //console.log("Motion not started")
         document.getElementById("motion").innerText = "No Motion started"
     }
 };
@@ -120,6 +124,6 @@ const removeMotion = () => {
 
 export {
     permitMotion,
-    removeMotion,
+    disableMotion,
 
 }

@@ -18,7 +18,7 @@ const deviceStore = useDeviceStore()
 
 import * as BleHandler from "./services/bleHandler"
 
-import { permitMotion, removeMotion, } from './services/deviceMotion'
+import { permitMotion, disableMotion, } from './services/deviceMotion'
 
 
 const logDeviceInfo = async () => {
@@ -319,7 +319,7 @@ const viewCtl = (val) => {
         </div>
 
         <va-button  @click="permitMotion">Start Motion</va-button>
-        <va-button @click="removeMotion">Stop Motion</va-button>
+        <va-button @click="disableMotion">Stop Motion</va-button>
         <p id="motion"></p>
 
         <!-- 
