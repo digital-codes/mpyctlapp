@@ -22,7 +22,7 @@ const DEVICE_INFO_SRV = '0000180a-0000-1000-8000-00805f9b34fb';
 const DEVICE_CONFIG_RD = "19e2282a-0777-4519-9d08-9bc983c3a7d0"
 const DEVICE_PAIR = "bda7b898-782a-4a50-8d10-79d897ea82c2"
 
-
+let notifyCnt = 0
 
 
 const DEV_PREFIX = 'MpyCtl'
@@ -332,7 +332,10 @@ const bleWritePair = async () => {
 
 const bleStartNotify = async () => {
     try {
-        if (!store.fn.connected) throw new Error("No device connected")
+        if (!store.fn.connected) {
+            document.getElementById("notify").innerText = "No device connected"
+            throw new Error("No device connected")
+        }
         const device = store.fn.device
         //console.log("Current device:",device)
         await client.startNotifications(
@@ -346,7 +349,11 @@ const bleStartNotify = async () => {
               //console.log('notify len:',value.byteLength);
               // we can iterate over input data
               // console.log('sensor value',value.getInt16(0,true) );
+              //document.getElementById("notify").innerText = `n1: ${notifyCnt}`
               const decrypedData = await decryptWithIv(value.buffer)
+              //notifyCnt++
+              //document.getElementById("notify").innerText = `n2: ${notifyCnt}`
+
               //console.log('decrypted value(s)',decrypedData);
               // now we need the personality to analyze the buffer ...
               const sensData = new DataView(decrypedData).getInt16(0,true)

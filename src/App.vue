@@ -170,7 +170,7 @@ watch(
 )
 
 
-const fallbackPersonality = 4 // normally 0. change for testing new personalities
+const fallbackPersonality = 0 // normally 0. change for testing new personalities
 
 const motionBtn = ref(null)
 
@@ -321,6 +321,7 @@ const viewCtl = (val) => {
         <va-button  @click="permitMotion">Start Motion</va-button>
         <va-button @click="disableMotion">Stop Motion</va-button>
         <p id="motion"></p>
+        <p id="notify"></p>
 
         <!-- 
         <ImuBView></ImuBView>
