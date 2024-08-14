@@ -47,7 +47,8 @@ const personalityComponents = [
   defineAsyncComponent(() => import('./components/charts/SimpleChart.vue')),
   defineAsyncComponent(() => import('./components/personalities/ImuBView.vue')),
   defineAsyncComponent(() => import('./components/personalities/RoverCar.vue')),
-  defineAsyncComponent(() => import('./components/personalities/WheelChair.vue'))
+  defineAsyncComponent(() => import('./components/personalities/WheelChair.vue')),
+  defineAsyncComponent(() => import('./components/personalities/MiniBot.vue'))
 ]
 
 /*
