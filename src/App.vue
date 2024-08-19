@@ -104,9 +104,13 @@ watch(
         // Rover Car
         console.log("Rover Car:", personality)
         break
-      case 4:
+        case 4:
         // Wheel chair
         console.log("Wheel Chair:", personality)
+        break
+        case 5:
+        // MiniBot
+        console.log("Mini Bot:", personality)
         break
       default:
         console.log("Unknown personality")
@@ -246,6 +250,7 @@ const viewCtl = (val) => {
     console.log(view.getUint8(i).toString(2).padStart(8, "0"));
   }
 }
+
 </script>
 
 <template>

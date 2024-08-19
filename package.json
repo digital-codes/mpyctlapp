@@ -18,7 +18,7 @@
   },
   "overrides": {
     "semver": "^7.6.3"
-  },  
+  },
   "dependencies": {
     "@babylonjs/core": "^7.17.2",
     "@capacitor-community/bluetooth-le": "^6.0.1",
@@ -35,10 +35,9 @@
     "@fortawesome/fontawesome-free": "^6.6.0",
     "@fortawesome/fontawesome-svg-core": "^6.6.0",
     "@fortawesome/vue-fontawesome": "^3.0.8",
-    "echarts": "^5.5.1",
     "pinia": "^2.1.7",
     "vue": "^3.4.34",
-    "vue3-echarts": "^1.1.0",
+    "vue-echarts": "^7.0.2",
     "vuestic-ui": "^1.9.12"
   },
   "devDependencies": {

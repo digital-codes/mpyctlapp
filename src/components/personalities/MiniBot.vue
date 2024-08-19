@@ -1,42 +1,25 @@
 <template>
   <div class="rover-ctl">
     <div class="bgrid">
-      <va-button
-        v-for="button in buttons"
-        :key="button.id"
-        @click="handleClick(button)"
-        :color="button.color"
-        :class="button.double?'double-width':''"
-      >
+      <va-button v-for="button in buttons" :key="button.id" @click="handleClick(button)" :color="button.color"
+        :class="button.double ? 'double-width' : ''">
         {{ button.label }}
       </va-button>
     </div>
     <div class="sgrid">
-      <va-slider
-        v-for="slider in sliders"
-        :key="slider.id"
-        v-model="slider.value"
-        :min="slider.min"
-        :max="slider.max"
-        @change="handleSliderChange(slider.id, slider.value)"
-        :label="slider.label"
-        track-label-visible
-        class="sld"
-      >
+      <va-slider v-for="slider in sliders" :key="slider.id" v-model="slider.value" :min="slider.min" :max="slider.max"
+        @change="handleSliderChange(slider.id, slider.value)" :label="slider.label" track-label-visible class="sld">
       </va-slider>
     </div>
     <div class="sgrid">
-      <va-checkbox
-        v-for="checkbox in checkboxes"
-        :key="checkbox.id"
-        v-model="checkbox.checked"
-        class="mb-6"
-        color="primary"
-        checked-icon="fa-check"
-        :label="checkbox.label"
-        @update:modelValue="handleCheckboxChange(checkbox.id, checkbox.checked)"
-      >
+      <va-checkbox v-for="checkbox in checkboxes" :key="checkbox.id" v-model="checkbox.checked" class="mb-6"
+        color="primary" checked-icon="fa-check" :label="checkbox.label"
+        @update:modelValue="handleCheckboxChange(checkbox.id, checkbox.checked)">
       </va-checkbox>
+
+      <div v-for="gauge in gauges" :key="gauge.id" class="gauge">
+        <SimpleGauge :value="gauge.value" :max="100" :label="gauge.label" :color="gauge.color">{{ gauge.type }}</SimpleGauge>
+      </div>
     </div>
   </div>
 </template>
@@ -45,40 +28,45 @@
 import { ref } from "vue";
 import { onMounted } from "vue";
 
+import SimpleGauge from "../charts/SimpleGauge.vue";
+
+
+
 onMounted(() => {
   console.log("Mounted");
   // buttons and checks are off by default. trnasmit default slider values only
   for (const item of sliders.value) {
     const id = item.id;
-    const value = item.value;  
+    const value = item.value;
     emit("slider-change", { id, value })
-  } 
+  }
 })
 
 const emit = defineEmits(["button-click", "slider-change", "checkbox-change"]);
 
 const buttons = ref([
-  { id: 1, label: "Left", color: "primary" },
+  { id: 1, label: "FFWD", color: "primary" },
   { id: 2, label: "FWD", color: "primary" },
   { id: 3, label: "REV", color: "primary" },
-  { id: 4, label: "Right", color: "primary" },
-  { id: 5, label: "FWD Left", color: "primary" },
-  { id: 6, label: "REV Left", color: "primary" },
-  { id: 7, label: "REV Right", color: "primary" },
-  { id: 8, label: "FWD Right", color: "primary" },
-  { id: 9, label: "Rot Left", color: "primary" },
-  { id: 10, label: "Stop", color: "warning", double: true},
-  { id: 11, label: "Rot Right", color: "primary" },
+  { id: 4, label: "FREV", color: "primary" },
+  { id: 5, label: "Rot Left", color: "primary" },
+  { id: 6, label: "Stop", color: "warning", double: true },
+  { id: 7, label: "Rot Right", color: "primary" },
 ]);
 
 const sliders = ref([
-  { id: 1, value: 5, min: 1, max: 10, label: "Speed" },
-  //{ id: 2, value: 0, min: -1, max: 1, label: "Rotation" },
+  { id: 1, value: 0, min: -5, max: 5, label: "LTrim" },
+  { id: 2, value: 0, min: -5, max: 5, label: "RTrim" },
 ]);
 
 const checkboxes = ref([
-  { id: 1, checked: false, label: "Grip Left" },
-  { id: 2, checked: false, label: "Grip Right" },
+  { id: 1, checked: false, label: "Lift" },
+  { id: 2, checked: false, label: "Grip" },
+]);
+
+const gauges = ref([
+  { id: 1, type: "rot", label: "Rot" },
+  { id: 2, type: "acc", label: "Acc" },
 ]);
 
 const handleClick = (button) => {
@@ -116,6 +104,7 @@ const handleCheckboxChange = (id, checked) => {
   grid-template-columns: repeat(4, 1fr);
   grid-gap: 10px;
 }
+
 .sgrid {
   margin-top: 2rem;
   display: grid;
@@ -124,7 +113,8 @@ const handleCheckboxChange = (id, checked) => {
 }
 
 .double-width {
-    grid-column: span 2; /* Makes the item span two columns */
+  grid-column: span 2;
+  /* Makes the item span two columns */
 }
 
 button {
@@ -139,8 +129,18 @@ button {
 .va-checkbox {
   text-align: center;
   grid-column: span 1;
-  margin:auto
+  margin: auto
 }
+
+.gauge {
+  grid-column: span 1;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+  grid-column: span 1;
+  margin: auto
+}
+
 
 @media (max-width: 500px) {
   button {

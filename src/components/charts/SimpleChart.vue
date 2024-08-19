@@ -1,13 +1,60 @@
 <template>
-    <vue-echarts :option="options" class="chart" ref="simpleChart" />
+    <v-chart class="chart" :option="options" aria-role="meter" ref="simpleChart" :theme="theme" autoresize />
 </template>
   
 <script setup lang="js">
 
 import { onMounted, onUnmounted, ref } from "vue"
-import { VueEcharts } from 'vue3-echarts';
 
-const simpleChart = ref()
+import VChart from 'vue-echarts';
+import { use } from "echarts/core";
+import { CanvasRenderer } from "echarts/renderers";
+// normally, only a single chart type is needed
+// unless toolbox allows to switch types (like here ...)
+import { LineChart, BarChart } from "echarts/charts";
+import {
+  TitleComponent,
+  TooltipComponent,
+  ToolboxComponent,
+  LegendComponent,
+  GridComponent,
+} from "echarts/components";
+
+use([
+  CanvasRenderer,
+  LineChart,
+  BarChart, 
+  TitleComponent,
+  TooltipComponent,
+  ToolboxComponent,
+  LegendComponent,
+  GridComponent,
+]);
+
+use([
+  CanvasRenderer,
+  LineChart,
+  TitleComponent,
+  TooltipComponent,
+  ToolboxComponent,
+  LegendComponent,
+  GridComponent,
+]);
+
+/*
+const chartOptions = ref(
+  lineBarDefaults(
+    props.dataName,
+    props.labelX,
+    props.labelY,
+    breakpoint.smUp ? "large" : "small",
+    props.locale
+  )
+);
+*/
+
+const simpleChart = ref(null)
+const theme = ref("light")
 
 const dataX = ref([0])
 const data1 = ref([1])
@@ -84,7 +131,7 @@ const pushData = async (dt) => {
         data2.value.shift()
         data3.value.shift()
     }
-    await simpleChart.value.setOption(options.value)
+    //await simpleChart.value.setOption(options.value)
 }
 
 const t = ref(null)
@@ -94,7 +141,7 @@ onMounted(() => {
         console.log("SimpleChart mounted")
         t.value = setInterval(() => {
         if (simpleChart.value) pushData(Math.random());
-        }, 200);
+        }, 500);
     } else {
         console.log("SimpleChart not mounted")
     }
