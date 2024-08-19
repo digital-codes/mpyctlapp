@@ -25,11 +25,46 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, watch } from "vue";
 import { onMounted } from "vue";
 
 import SimpleGauge from "../charts/SimpleGauge.vue";
 
+// pinia
+import { useDeviceStore } from "../../stores/BleDevices";
+const deviceStore = useDeviceStore()
+
+watch(
+  () => deviceStore.sensDataRaw,
+  async (newVal, oldVal) => {
+    //console.log('minibot status changed from', oldVal, 'to', newVal);
+    const view = new DataView(newVal);
+    // expect 6 int16 values
+    const accX = view.getInt16(0, true)/1000
+    const accY = view.getInt16(2, true)/1000
+    const accZ = view.getInt16(4, true)/1000
+    const gyroX = view.getInt16(6, true)/1000
+    const gyroY = view.getInt16(8, true)/1000
+    const gyroZ = view.getInt16(10, true)/1000
+    console.log("acc", accX,accY,accZ)
+    console.log("gyro", gyroX,gyroY,gyroZ)
+  },
+  { deep: true }
+)
+
+const updateDevice = (status = 0) => {
+  console.log("Updating device", status)
+  // deviceCtl is 5 bytes, last one only to inidcate change for pinia update
+  // 0: starting, 1: speed, 2: turn, 3: direction, 4: voltage. 5: ref cnt only for pinia
+  deviceCtl.value[0] = status   // normal, starting, stopping
+  deviceCtl.value[1] = items.value[3].value // speed
+  deviceCtl.value[2] = items.value[6].value // turn
+  deviceCtl.value[3] = items.value[5].value ? 1 : 0 // direction
+  deviceCtl.value[4] = voltage.value ? 1 : 0 // 12V or 24V
+  deviceCtl.value[5] = ++ctlIdx.value // ref cnt
+
+  deviceStore.setCtlData(deviceCtl.value)
+}
 
 
 onMounted(() => {
