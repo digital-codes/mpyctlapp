@@ -43,7 +43,7 @@ const RoverCtl = defineAsyncComponent(() =>
 const currentPersonality = shallowRef('DefaultPersonality');
 
 const personalityComponents = [
-  defineAsyncComponent(() => import('./components/charts/SimpleChart.vue')),
+  defineAsyncComponent(() => import('./components/personalities/EmptyView.vue')),
   defineAsyncComponent(() => import('./components/charts/SimpleChart.vue')),
   defineAsyncComponent(() => import('./components/personalities/ImuBView.vue')),
   defineAsyncComponent(() => import('./components/personalities/RoverCar.vue')),
@@ -175,7 +175,7 @@ watch(
 )
 
 
-const fallbackPersonality = 0 // normally 0. change for testing new personalities
+const fallbackPersonality = 5 // normally 0. change for testing new personalities
 
 const motionBtn = ref(null)
 

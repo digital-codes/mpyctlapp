@@ -52,16 +52,61 @@ watch(
   { deep: true }
 )
 
-const updateDevice = (status = 0) => {
-  console.log("Updating device", status)
-  // deviceCtl is 5 bytes, last one only to inidcate change for pinia update
-  // 0: starting, 1: speed, 2: turn, 3: direction, 4: voltage. 5: ref cnt only for pinia
-  deviceCtl.value[0] = status   // normal, starting, stopping
-  deviceCtl.value[1] = items.value[3].value // speed
-  deviceCtl.value[2] = items.value[6].value // turn
-  deviceCtl.value[3] = items.value[5].value ? 1 : 0 // direction
-  deviceCtl.value[4] = voltage.value ? 1 : 0 // 12V or 24V
-  deviceCtl.value[5] = ++ctlIdx.value // ref cnt
+
+const ctlIdx = ref(0)
+const botCtl = ref({
+  lspeed: 0,
+  rspeed: 0,
+  ltrim: 0,
+  rtrim: 0,
+  grip: 0,
+  lift: 0,
+  color: 0
+})
+
+const botReset = () => {
+  for (const slider of sliders.value) {
+    slider.value = 0
+  }
+  for (const checkbox of checkboxes.value) {
+    checkbox.checked = false
+  }
+
+  botCtl.value.lspeed = 0
+  botCtl.value.rspeed = 0
+  botCtl.value.ltrim = 0
+  botCtl.value.rtrim = 0
+  botCtl.value.grip = 0
+  botCtl.value.lift = 0
+  botCtl.value.color = 0
+}
+
+const botColor = (color) => {
+  const r = color[0] >> 6
+  const g = color[1] >> 4
+  const b = color[2] >> 6  
+  const col = ((r << 6) | (g << 2) | b)
+  console.log("color", col)
+  return col
+}
+
+// deviceCtl is 8 bytes + extra byte to inidcate change for pinia update
+// int8 speed left,right (-10..10)
+// int8 -10 ..10 trim left, right
+// uint8 0..180 grip and lift
+// uint8 color rgb 242
+// uint8, update
+const deviceCtl = ref([0, 0, 0, 0, 0, 0, 0, 0])
+const updateDevice = () => {
+  console.log("Updating device")
+  deviceCtl.value[0] = botCtl.value.lspeed
+  deviceCtl.value[1] = botCtl.value.rspeed
+  deviceCtl.value[2] = botCtl.value.ltrim
+  deviceCtl.value[3] = botCtl.value.rtrim
+  deviceCtl.value[4] = botCtl.value.grip
+  deviceCtl.value[5] = botCtl.value.lift
+  deviceCtl.value[6] = botCtl.value.color
+  deviceCtl.value[7] = ++ctlIdx.value // ref cnt
 
   deviceStore.setCtlData(deviceCtl.value)
 }
@@ -69,57 +114,104 @@ const updateDevice = (status = 0) => {
 
 onMounted(() => {
   console.log("Mounted");
-  // buttons and checks are off by default. trnasmit default slider values only
-  for (const item of sliders.value) {
-    const id = item.id;
-    const value = item.value;
-    emit("slider-change", { id, value })
-  }
+  botReset()
+  updateDevice()
 })
 
-const emit = defineEmits(["button-click", "slider-change", "checkbox-change"]);
-
 const buttons = ref([
-  { id: 1, label: "FFWD", color: "primary" },
-  { id: 2, label: "FWD", color: "primary" },
-  { id: 3, label: "REV", color: "primary" },
-  { id: 4, label: "FREV", color: "primary" },
-  { id: 5, label: "Rot Left", color: "primary" },
-  { id: 6, label: "Stop", color: "warning", double: true },
-  { id: 7, label: "Rot Right", color: "primary" },
+  { id: 0, label: "FFWD", color: "primary" },
+  { id: 1, label: "FWD", color: "primary" },
+  { id: 2, label: "REV", color: "primary" },
+  { id: 3, label: "FREV", color: "primary" },
+  { id: 4, label: "Rot Left", color: "primary" },
+  { id: 5, label: "Stop", color: "warning", double: true },
+  { id: 6, label: "Rot Right", color: "primary" },
 ]);
 
 const sliders = ref([
-  { id: 1, value: 0, min: -5, max: 5, label: "LTrim" },
-  { id: 2, value: 0, min: -5, max: 5, label: "RTrim" },
+  { id: 0, value: 0, min: -5, max: 5, label: "LTrim" },
+  { id: 1, value: 0, min: -5, max: 5, label: "RTrim" },
 ]);
 
 const checkboxes = ref([
-  { id: 1, checked: false, label: "Lift" },
-  { id: 2, checked: false, label: "Grip" },
+  { id: 0, checked: false, label: "Lift" },
+  { id: 1, checked: false, label: "Grip" },
 ]);
 
 const gauges = ref([
-  { id: 1, type: "rot", label: "Rot" },
-  { id: 2, type: "acc", label: "Acc" },
+  { id: 0, type: "rot", label: "Rot" },
+  { id: 1, type: "acc", label: "Acc" },
 ]);
 
 const handleClick = (button) => {
   // Handle button click logic here
   console.log(`Button ${button.id} clicked`);
-  emit("button-click", button.id);
+  switch (button.id) {
+    case 0:
+      botCtl.value.lspeed = 10
+      botCtl.value.rspeed = 10
+      botCtl.value.color = botColor([0, 100, 0])
+      break;
+    case 1:
+      botCtl.value.lspeed = 5
+      botCtl.value.rspeed = 5
+      botCtl.value.color = botColor([0, 16, 0])
+      break;
+    case 2:
+      botCtl.value.lspeed = -5
+      botCtl.value.rspeed = -5
+      botCtl.value.color = botColor([16, 16, 0])
+      break;
+    case 3:
+      botCtl.value.lspeed = -10
+      botCtl.value.rspeed = -10
+      botCtl.value.color = botColor([100, 100, 0])
+      break;
+    case 4:
+      botCtl.value.lspeed = -5
+      botCtl.value.rspeed = 5
+      botCtl.value.color = botColor([16, 0, 16])
+      break;
+    case 5:
+      botCtl.value.lspeed = 0
+      botCtl.value.rspeed = 0
+      botCtl.value.color = botColor([16, 16, 16])
+      break;
+    case 6:
+      botCtl.value.lspeed = 5
+      botCtl.value.rspeed = -5
+      botCtl.value.color = botColor([0, 16, 16])
+      break;
+  }
+  updateDevice()
 };
 
 const handleSliderChange = (id, value) => {
   // Handle slider change logic here
   console.log(`Slider ${id} changed to ${value}`);
-  emit("slider-change", { id, value });
+  switch (id) {
+    case 0:
+      botCtl.value.ltrim = value
+      break;
+    case 1:
+      botCtl.value.rtrim = value
+      break;
+  }
+  updateDevice()
 };
 
 const handleCheckboxChange = (id, checked) => {
   // Handle checkbox change logic here
   console.log(`Checkbox ${id} changed to ${checked}`);
-  emit("checkbox-change", { id, checked });
+  switch (id) {
+    case 0:
+      botCtl.value.lift = checked ? 180 : 0
+      break;
+    case 1:
+      botCtl.value.grip = checked ? 180 : 0
+      break;
+  }
+  updateDevice()
 };
 </script>
 
