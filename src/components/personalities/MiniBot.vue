@@ -18,7 +18,7 @@
       </va-checkbox>
 
       <div v-for="gauge in gauges" :key="gauge.id" class="gauge">
-        <SimpleGauge :value="gauge.value" :max="100" :label="gauge.label" :color="gauge.color">{{ gauge.type }}</SimpleGauge>
+        <SimpleGauge :value="gauge.value" :max="gauge.max" :min="gauge.min" :label="gauge.label" :color="gauge.color">{{ gauge.type }}</SimpleGauge>
       </div>
     </div>
   </div>
@@ -46,8 +46,10 @@ watch(
     const gyroX = view.getInt16(6, true)/1000
     const gyroY = view.getInt16(8, true)/1000
     const gyroZ = view.getInt16(10, true)/1000
-    console.log("acc", accX,accY,accZ)
-    console.log("gyro", gyroX,gyroY,gyroZ)
+    //console.log("acc", accX,accY,accZ)
+    //console.log("gyro", gyroX,gyroY,gyroZ)
+    gauges.value[0].value = Math.round(gyroZ)
+    gauges.value[1].value = Math.round(accY)
   },
   { deep: true }
 )
@@ -139,8 +141,8 @@ const checkboxes = ref([
 ]);
 
 const gauges = ref([
-  { id: 0, type: "rot", label: "Rot" },
-  { id: 1, type: "acc", label: "Acc" },
+  { id: 0, type: "rot", label: "Rot", min: -10, max: 10 },
+  { id: 1, type: "acc", label: "Acc", min: -5, max: 5 },
 ]);
 
 const handleClick = (button) => {

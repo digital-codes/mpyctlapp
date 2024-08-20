@@ -102,15 +102,15 @@ watch(
         break;
       case 3:
         // Rover Car
-        console.log("Rover Car:", personality)
+        //console.log("Rover Car:", personality)
         break
         case 4:
         // Wheel chair
-        console.log("Wheel Chair:", personality)
+        //console.log("Wheel Chair:", personality)
         break
         case 5:
         // MiniBot
-        console.log("Mini Bot:", personality)
+        //console.log("Mini Bot:", personality)
         break
       default:
         console.log("Unknown personality")

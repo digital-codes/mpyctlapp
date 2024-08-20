@@ -4,7 +4,7 @@
   
 <script setup lang="js">
 
-import { onMounted, onUnmounted, ref } from "vue"
+import { onMounted, onUnmounted, ref, watch } from "vue"
 
 import VChart from 'vue-echarts';
 // echart stuff for vue-echarts
@@ -27,6 +27,32 @@ use([
     GaugeChart,
 ]);
 
+const props = defineProps({
+    value: {
+        type: [Number, Array],
+        default: 0
+    },
+    max: {
+        type: Number,
+        default: 20
+    },
+    min: {
+        type: Number,
+        default: -20
+    },
+    label: {
+        type: String,
+        required: true
+    },
+})  
+
+watch (() => props.value, (newVal, oldVal) => {
+    //console.log("SimpleGauge value changed from", oldVal, "to", newVal)
+    option.value.series[0].data[0].value = newVal
+})
+
+
+
 const option = ref({
     aria: {
         enabled: true,
@@ -38,12 +64,16 @@ const option = ref({
     },
     */
     title: {
-        text: "Gauge 1360",
+        text: props.label,
         left: "center",
     },
     series: [
         {
             type: 'gauge',
+            startAngle: 180,
+            endAngle: 0,
+            min: props.min,
+            max: props.max,
             progress: {
                 show: true,
                 width: 18
@@ -57,6 +87,7 @@ const option = ref({
                 show: false
             },
             splitLine: {
+                show:false,
                 length: 15,
                 lineStyle: {
                     width: 2,
@@ -64,6 +95,7 @@ const option = ref({
                 }
             },
             axisLabel: {
+                show:false,
                 distance: 25,
                 color: '#999',
                 fontSize: 20
@@ -71,7 +103,7 @@ const option = ref({
             anchor: {
                 show: true,
                 showAbove: true,
-                size: 25,
+                size: 10,
                 itemStyle: {
                     borderWidth: 10
                 }
@@ -80,8 +112,8 @@ const option = ref({
                 show: false
             },
             detail: {
-                valueAnimation: true,
-                fontSize: 80,
+                valueAnimation: false,
+                fontSize: 32,
                 offsetCenter: [0, '70%']
             },
             data: [
