@@ -150,37 +150,37 @@ const handleClick = (button) => {
     case 0:
       botCtl.value.lspeed = 10
       botCtl.value.rspeed = 10
-      botCtl.value.color = botColor([0, 100, 0])
+      botCtl.value.color = botColor([0, 196, 0])
       break;
     case 1:
       botCtl.value.lspeed = 5
       botCtl.value.rspeed = 5
-      botCtl.value.color = botColor([0, 16, 0])
+      botCtl.value.color = botColor([0, 64, 0])
       break;
     case 2:
       botCtl.value.lspeed = -5
       botCtl.value.rspeed = -5
-      botCtl.value.color = botColor([16, 16, 0])
+      botCtl.value.color = botColor([64, 64, 0])
       break;
     case 3:
       botCtl.value.lspeed = -10
       botCtl.value.rspeed = -10
-      botCtl.value.color = botColor([100, 100, 0])
+      botCtl.value.color = botColor([196, 196, 0])
       break;
     case 4:
       botCtl.value.lspeed = -5
       botCtl.value.rspeed = 5
-      botCtl.value.color = botColor([16, 0, 16])
+      botCtl.value.color = botColor([64, 0, 64])
       break;
     case 5:
       botCtl.value.lspeed = 0
       botCtl.value.rspeed = 0
-      botCtl.value.color = botColor([16, 16, 16])
+      botCtl.value.color = botColor([64, 64, 64])
       break;
     case 6:
       botCtl.value.lspeed = 5
       botCtl.value.rspeed = -5
-      botCtl.value.color = botColor([0, 16, 16])
+      botCtl.value.color = botColor([0, 64, 64])
       break;
   }
   updateDevice()
