@@ -74,6 +74,10 @@ const option = ref({
             endAngle: 0,
             min: props.min,
             max: props.max,
+            animationDuringUpdate:0,
+            animationDelay:0,
+            animationDuration: 0,
+            animationEasingUpdate:0,
             progress: {
                 show: true,
                 width: 18

@@ -25,7 +25,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
+import { nextTick, ref, watch } from "vue";
 import { onMounted } from "vue";
 
 import SimpleGauge from "../charts/SimpleGauge.vue";
@@ -114,10 +114,15 @@ const updateDevice = () => {
 }
 
 
-onMounted(() => {
+onMounted(async () => {
   console.log("Mounted");
   botReset()
   updateDevice()
+  gauges.value[0].value = 1
+  gauges.value[1].value = 1
+  await nextTick()
+  gauges.value[0].value = 0
+  gauges.value[1].value = 0
 })
 
 const buttons = ref([
@@ -141,8 +146,8 @@ const checkboxes = ref([
 ]);
 
 const gauges = ref([
-  { id: 0, type: "rot", label: "Rot", min: -10, max: 10 },
-  { id: 1, type: "acc", label: "Acc", min: -5, max: 5 },
+  { id: 0, type: "rot", label: "Rot", value: 0, min: -10, max: 10 },
+  { id: 1, type: "acc", label: "Acc", value: 0, min: -5, max: 5 },
 ]);
 
 const handleClick = (button) => {
