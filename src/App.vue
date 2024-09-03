@@ -344,7 +344,11 @@ const viewCtl = (val) => {
         </div>
         <div v-else>
           <p>Device not paired</p>
-          <EmptyView></EmptyView>
+          <!-- -->
+            <EmptyView></EmptyView>
+          <!--
+            <component :is="personalityComponents[5]"></component>
+          -->
         </div>
       </main>
     </template>
