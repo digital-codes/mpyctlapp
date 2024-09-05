@@ -1,6 +1,7 @@
 <script setup>
 import { onMounted, ref, shallowRef, watch } from "vue";
-import logo from "./assets/imgs/logo.png";
+import logo from "./assets/imgs/logo.svg";
+import logoDark from "./assets/imgs/logo-dark.svg";
 
 import ExitCheck from "./components/ExitCheck.vue";
 import EmptyView from "./components/personalities/EmptyView.vue";

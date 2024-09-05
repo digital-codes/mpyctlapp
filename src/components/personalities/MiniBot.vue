@@ -2,14 +2,27 @@
   <div class="rover-ctl">
     <div class="type">
       <va-switch
-        v-model="botType"
+        v-model="botWheels"
         color="primary"
-        true-inner-label="Lego"
-        false-inner-label="Mini"
-        label="Bot Type"
+        true-inner-label="4"
+        false-inner-label="2"
+        label="2/4 Wheels"
         leftLabel="true"
         size="medium"
-        @input="typeChange"
+        @input="wheelChange"
+      >
+      </va-switch>
+    </div>
+    <div class="type">
+      <va-switch
+        v-model="botScale"
+        color="primary"
+        true-inner-label="2"
+        false-inner-label="1"
+        label="Speed Scale"
+        leftLabel="true"
+        size="medium"
+        @input="scaleChange"
       >
       </va-switch>
     </div>
@@ -141,8 +154,13 @@ const botColor = (color) => {
 const deviceCtl = ref([0, 0, 0, 0, 0, 0, 0, 0]);
 const updateDevice = () => {
   console.log("Updating device");
-  deviceCtl.value[0] = botCtl.value.lspeed;
-  deviceCtl.value[1] = botCtl.value.rspeed;
+  console.log("speed0", botCtl.value.lspeed, botCtl.value.rspeed,botScale.value);
+  const lscale = botCtl.value.lspeed == 0 ? 0 : (botCtl.value.lspeed < 0 ? -1 : 1);
+  const rscale = botCtl.value.rspeed == 0 ? 0 : (botCtl.value.rspeed < 0 ? -1 : 1);
+  deviceCtl.value[0] = botCtl.value.lspeed + (botScale.value ? lscale * 10 : 0);
+  deviceCtl.value[1] = botCtl.value.rspeed + (botScale.value ? rscale * 10 : 0);
+  console.log("speed", deviceCtl.value[0], deviceCtl.value[1]);
+  console.log("scale", lscale,rscale);
   deviceCtl.value[2] = botCtl.value.ltrim;
   deviceCtl.value[3] = botCtl.value.rtrim;
   deviceCtl.value[4] = botCtl.value.grip;
@@ -153,9 +171,15 @@ const updateDevice = () => {
   deviceStore.setCtlData(deviceCtl.value);
 };
 
-const botType = ref(false);
-const typeChange = () => {
-  console.log("Bot type changed:", botType.value);
+const botWheels = ref(false);
+const wheelChange = () => {
+  console.log("Bot wheels changed:", botWheels.value);
+  // updateDevice(); // has no effect here without setting speed
+};
+const botScale = ref(false);
+const scaleChange = () => {
+  console.log("Bot scale changed:", botScale.value);
+  updateDevice();
 };
 
 onMounted(async () => {
@@ -218,9 +242,9 @@ const handleClick = (button) => {
       botCtl.value.rspeed = -10;
       botCtl.value.color = botColor([196, 196, 0]);
       break;
-    // left and right are type dependant
+    // left and right dependant on wheels
     case 4:
-      if (!botType.value) {
+      if (!botWheels.value) {
         botCtl.value.lspeed = -5;
         botCtl.value.rspeed = 5;
       } else {
@@ -230,7 +254,7 @@ const handleClick = (button) => {
       botCtl.value.color = botColor([64, 0, 64]);
       break;
     case 6:
-      if (!botType.value) {
+      if (!botWheels.value) {
         botCtl.value.lspeed = 5;
         botCtl.value.rspeed = -5;
       } else {
@@ -286,6 +310,11 @@ const handleCheckboxChange = (id, checked) => {
   margin-left: auto;
   margin-right: auto;
   padding: 1rem;
+}
+
+.type {
+  margin-top: 1rem;
+  display:inline-block;
 }
 
 .bgrid {
