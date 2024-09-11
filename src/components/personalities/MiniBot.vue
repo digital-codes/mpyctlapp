@@ -46,6 +46,7 @@
         :max="slider.max"
         @change="handleSliderChange(slider.id, slider.value)"
         :label="slider.label"
+        :disabled="slider.disabled"
         track-label-visible
         class="sld"
       >
@@ -93,17 +94,19 @@ watch(
   async (newVal, oldVal) => {
     //console.log('minibot status changed from', oldVal, 'to', newVal);
     const view = new DataView(newVal);
-    // expect 6 int16 values
+    // expect 6 int16 values + 1 byte for tof
     const accX = view.getInt16(0, true) / 1000;
     const accY = view.getInt16(2, true) / 1000;
     const accZ = view.getInt16(4, true) / 1000;
     const gyroX = view.getInt16(6, true) / 1000;
     const gyroY = view.getInt16(8, true) / 1000;
     const gyroZ = view.getInt16(10, true) / 1000;
+    const distance = view.getUint8(12, true);
     //console.log("acc", accX,accY,accZ)
     //console.log("gyro", gyroX,gyroY,gyroZ)
     gauges.value[0].value = Math.round(gyroZ);
     gauges.value[1].value = Math.round(accY);
+    sliders.value[2].value = distance;
   },
   { deep: true }
 );
@@ -204,8 +207,9 @@ const buttons = ref([
 ]);
 
 const sliders = ref([
-  { id: 0, value: 0, min: -5, max: 5, label: "LTrim" },
-  { id: 1, value: 0, min: -5, max: 5, label: "RTrim" },
+  { id: 0, value: 0, min: -5, max: 5, label: "LTrim",disabled:false },
+  { id: 1, value: 0, min: -5, max: 5, label: "RTrim",disabled:false },
+  { id: 2, value: 0, min: 0, max: 100, label: "Dist",disabled:true },
 ]);
 
 const checkboxes = ref([
