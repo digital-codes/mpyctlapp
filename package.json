@@ -20,7 +20,7 @@
     "semver": "^7.6.3"
   },
   "dependencies": {
-    "@babylonjs/core": "^7.27.0",
+    "@babylonjs/core": "^7.51.0",
     "@capacitor-community/bluetooth-le": "^6.0.1",
     "@capacitor/android": "^6.1.2",
     "@capacitor/app": "^6.0.1",
@@ -31,19 +31,19 @@
     "@capacitor/motion": "^6.0.1",
     "@capacitor/preferences": "^6.0.2",
     "@capacitor/splash-screen": "^6.0.2",
-    "@fontsource/dekko": "^5.0.20",
-    "@fortawesome/fontawesome-free": "^6.6.0",
-    "@fortawesome/fontawesome-svg-core": "^6.6.0",
+    "@fontsource/dekko": "^5.1.1",
+    "@fortawesome/fontawesome-free": "^6.7.2",
+    "@fortawesome/fontawesome-svg-core": "^6.7.2",
     "@fortawesome/vue-fontawesome": "^3.0.8",
-    "pinia": "^2.2.2",
-    "vue": "^3.5.10",
+    "pinia": "^3.0.1",
+    "vue": "^3.5.13",
     "vue-echarts": "^7.0.3",
-    "vuestic-ui": "^1.10.2"
+    "vuestic-ui": "^1.10.3"
   },
   "devDependencies": {
     "@capacitor/assets": "^3.0.5",
     "@capacitor/cli": "^6.1.2",
     "@vitejs/plugin-vue": "^5.1.4",
-    "vite": "^5.4.8"
+    "vite": "^6.2.0"
   }
 }
