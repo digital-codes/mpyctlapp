@@ -21,6 +21,9 @@ import * as BleHandler from "./services/bleHandler"
 
 import { permitMotion, disableMotion, } from './services/deviceMotion'
 
+// test material icon components
+import BLE from '@material-symbols/svg-400/outlined/bluetooth_drive.svg';
+
 
 const logDeviceInfo = async () => {
   const info = await Device.getInfo();
@@ -313,6 +316,7 @@ const viewCtl = (val) => {
         </div>
         <div v-else class="upload">
           <p>Upload Devices</p>
+          <VaAvatar :src="BLE" class="mr-6" />
           <VaFileUpload v-model="deviceFiles" file-types="json" />
         </div>
         <div class="devlist">
