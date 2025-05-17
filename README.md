@@ -20,3 +20,18 @@ set sdk location in android/local.properties
 
 > sdk.dir=/home/kugel/Android/Sdk
 
+
+# Chromium
+maybe in group bluetooth
+
+
+snap run chromium \
+  --enable-experimental-web-platform-features \
+  --enable-web-bluetooth
+
+
+localhost:
+snap run chromium \
+  --enable-experimental-web-platform-features \
+  --enable-web-bluetooth \
+  --unsafely-treat-insecure-origin-as-secure=http://localhost:8000
