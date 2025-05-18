@@ -1,4 +1,4 @@
-# Vue 3, Vite, Capacitor
+# Web-BLE control app
 
 Mobile app to interact with BLE perpherals like https://github.com/digital-codes/bleSensor
 
