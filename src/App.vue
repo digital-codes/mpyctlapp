@@ -24,6 +24,9 @@ import { permitMotion, disableMotion, } from './services/deviceMotion'
 // test material icon components
 import BLE from '@material-symbols/svg-400/outlined/bluetooth_drive.svg';
 
+// tts test
+import { speak, stop, getSupportedLanguages, getSupportedVoices } from './services/tts';
+
 
 const logDeviceInfo = async () => {
   const info = await Device.getInfo();
@@ -204,6 +207,27 @@ onMounted(async () => {
   const k = await dbKeys()
   console.log("Keys:", k)
   console.log(await dbCheck(devId))
+
+  // tts test
+  const voices = await getSupportedVoices();
+  const voiceNums = {}
+  console.log("Voices:", voices);
+  voices.voices.forEach((voice, index) => {
+    if (voice.lang === "de") {
+      //console.log(`Index: ${index}, Voice: ${voice.name}, Lang: ${voice.lang}, Default: ${voice.default}`);
+      voiceNums.male = index
+      voiceNums.female = index
+      if (voice.name === "German+Max") 
+        voiceNums.male = index
+      if (voice.name === "German+Andrea") 
+      voiceNums.female = index
+    }
+  });
+  console.log("Voice Numbers:", voiceNums);
+  const languages = await getSupportedLanguages();
+  console.log("Languages:", languages);
+  await speak("Hallo. Hier ist deine App", "de", voiceNums.female);
+  await stop();
 
 });
 
