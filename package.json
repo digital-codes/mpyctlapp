@@ -36,7 +36,7 @@
     "@material-symbols/svg-400": "^0.28.2",
     "pinia": "^3.0.2",
     "vue": "^3.5.13",
-    "vue-echarts": "^7.0.3",
+    "vue-echarts": "^8.0.1",
     "vuestic-ui": "^1.10.3"
   },
   "devDependencies": {
