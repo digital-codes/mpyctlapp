@@ -35,7 +35,7 @@
     "@fortawesome/vue-fontawesome": "^3.0.8",
     "@material-symbols/svg-400": "^0.28.2",
     "pinia": "^3.0.2",
-    "vue": "^3.5.13",
+    "vue": "^3.5.44",
     "vue-echarts": "^8.0.1",
     "vuestic-ui": "^1.10.3"
   },
